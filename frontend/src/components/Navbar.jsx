@@ -1,10 +1,15 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { useAuth } from '../context/AuthContext'
+import { logoutUser, USER_ROLES } from '../firebase/auth'
 
 const Navbar = () => {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { currentUser, userRole, isNGO, isIndustry, isAdmin } = useAuth()
   const [scrolled, setScrolled] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -13,6 +18,26 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const handleLogout = async () => {
+    await logoutUser()
+    setShowUserMenu(false)
+    navigate('/login')
+  }
+
+  const getRoleIcon = () => {
+    if (isNGO) return '🌱'
+    if (isIndustry) return '🏭'
+    if (isAdmin) return '👨‍💼'
+    return '👤'
+  }
+
+  const getRoleLabel = () => {
+    if (isNGO) return 'NGO'
+    if (isIndustry) return 'Industry'
+    if (isAdmin) return 'Admin'
+    return 'User'
+  }
 
   const isActive = (path) => location.pathname === path
 
@@ -102,49 +127,105 @@ const Navbar = () => {
               </motion.div>
             </Link>
 
-            <Link to="/projects">
-              <motion.div
-                className={`relative px-4 py-2 text-sm font-medium transition-colors ${isActive('/projects')
-                    ? 'text-teal-300'
-                    : 'text-gray-300 hover:text-white'
-                  }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Projects
-                {isActive('/projects') && (
+            {currentUser && (
+              <>
+                <Link to="/projects">
                   <motion.div
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-400 to-ocean-500"
-                    layoutId="underline"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                )}
-              </motion.div>
-            </Link>
+                    className={`relative px-4 py-2 text-sm font-medium transition-colors ${isActive('/projects')
+                        ? 'text-teal-300'
+                        : 'text-gray-300 hover:text-white'
+                      }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Projects
+                    {isActive('/projects') && (
+                      <motion.div
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-400 to-ocean-500"
+                        layoutId="underline"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    )}
+                  </motion.div>
+                </Link>
 
-            <Link to="/dashboard">
-              <motion.div
-                className={`relative px-4 py-2 text-sm font-medium transition-colors ${isActive('/dashboard')
-                    ? 'text-teal-300'
-                    : 'text-gray-300 hover:text-white'
-                  }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Dashboard
-                {isActive('/dashboard') && (
+                <Link to="/dashboard">
                   <motion.div
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-400 to-ocean-500"
-                    layoutId="underline"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  />
+                    className={`relative px-4 py-2 text-sm font-medium transition-colors ${isActive('/dashboard')
+                        ? 'text-teal-300'
+                        : 'text-gray-300 hover:text-white'
+                      }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Dashboard
+                    {isActive('/dashboard') && (
+                      <motion.div
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-400 to-ocean-500"
+                        layoutId="underline"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    )}
+                  </motion.div>
+                </Link>
+              </>
+            )}
+
+            {/* Auth Section */}
+            {currentUser ? (
+              <div className="relative">
+                <motion.button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-2 bg-gradient-to-r from-teal-500/20 to-ocean-500/20 backdrop-blur-sm px-4 py-2 rounded-lg border border-teal-400/30 hover:border-teal-400/50 transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <span className="text-xl">{getRoleIcon()}</span>
+                  <div className="text-left">
+                    <div className="text-sm font-medium text-white">
+                      {currentUser.displayName || currentUser.email}
+                    </div>
+                    <div className="text-xs text-teal-300">{getRoleLabel()}</div>
+                  </div>
+                </motion.button>
+
+                {/* User Dropdown Menu */}
+                {showUserMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute right-0 mt-2 w-48 bg-gray-900/95 backdrop-blur-lg rounded-lg shadow-xl border border-teal-400/30 overflow-hidden"
+                  >
+                    <div className="px-4 py-3 border-b border-gray-700">
+                      <p className="text-sm text-gray-300">Signed in as</p>
+                      <p className="text-sm font-medium text-white truncate">
+                        {currentUser.email}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </motion.div>
                 )}
-              </motion.div>
-            </Link>
+              </div>
+            ) : (
+              <Link to="/login">
+                <motion.button
+                  className="bg-gradient-to-r from-teal-500 to-ocean-600 text-white px-6 py-2 rounded-lg font-medium shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Sign In
+                </motion.button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
