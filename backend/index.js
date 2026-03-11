@@ -27,6 +27,16 @@ app.get("/", (req, res) => {
   res.send("Backend running");
 });
 
+// Get available Ganache accounts
+app.get("/accounts", async (req, res) => {
+  try {
+    const accounts = await web3.eth.getAccounts();
+    res.json(accounts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Register a new carbon-offset project
 app.post("/register-project", async (req, res) => {
   try {
@@ -52,7 +62,12 @@ app.get("/projects", async (req, res) => {
 
     for (let i = 1; i <= count; i++) {
       const p = await contract.methods.getProject(i).call();
-      projects.push(p);
+      projects.push({
+        id: (p.id !== undefined ? p.id : p[0]).toString(),
+        name: p.name !== undefined ? p.name : p[1],
+        owner: p.owner !== undefined ? p.owner : p[2],
+        verified: p.verified !== undefined ? p.verified : p[3]
+      });
     }
 
     res.json(projects);
@@ -104,7 +119,13 @@ app.get("/credits", async (req, res) => {
 
     for (let i = 1; i <= count; i++) {
       const c = await contract.methods.getCredit(i).call();
-      credits.push(c);
+      credits.push({
+        id: (c.id !== undefined ? c.id : c[0]).toString(),
+        projectId: (c.projectId !== undefined ? c.projectId : c[1]).toString(),
+        amount: (c.amount !== undefined ? c.amount : c[2]).toString(),
+        owner: c.owner !== undefined ? c.owner : c[3],
+        retired: c.retired !== undefined ? c.retired : c[4]
+      });
     }
 
     res.json(credits);
