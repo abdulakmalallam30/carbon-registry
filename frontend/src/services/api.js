@@ -22,20 +22,31 @@ export const getProjects = async () => {
     }
 };
 
-export const registerProject = async (name) => {
+export const registerProject = async (name, description, location, acres) => {
     try {
         const response = await fetch(`${API_URL}/register-project`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name }),
+            body: JSON.stringify({ name, description, location, acres }),
         });
         if (!response.ok) throw new Error('Failed to register project');
         return await response.json();
     } catch (error) {
         console.error('API Error (registerProject):', error);
         return { success: false, error: error.message };
+    }
+};
+
+export const searchProjectById = async (projectId) => {
+    try {
+        const response = await fetch(`${API_URL}/projects/${projectId}`);
+        if (!response.ok) throw new Error('Project not found');
+        return await response.json();
+    } catch (error) {
+        console.error('API Error (searchProjectById):', error);
+        return null;
     }
 };
 

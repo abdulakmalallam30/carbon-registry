@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getProjects, getCredits, issueCredit, getAccounts, verifyProject, registerProject, retireCredit } from '../services/api'
+import { getProjects, getCredits, issueCredit, getAccounts, verifyProject, registerProject, retireCredit, searchProjectById } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 
 const Dashboard = () => {
-    const { currentUser, userRole, isNGO, isIndustry, isAdmin } = useAuth()
     const { currentUser, userRole, isNGO, isIndustry, isAdmin } = useAuth()
     const [projectsCount, setProjectsCount] = useState(0)
     const [creditsIssued, setCreditsIssued] = useState(0)
@@ -12,13 +11,23 @@ const Dashboard = () => {
     const [recentActivity, setRecentActivity] = useState([])
     const [loading, setLoading] = useState(true)
     const [allProjects, setAllProjects] = useState([])
+    const [filteredProjects, setFilteredProjects] = useState([])
     const [allCredits, setAllCredits] = useState([])
     const [accounts, setAccounts] = useState([])
     const [showAccounts, setShowAccounts] = useState(false)
 
+    // Search functionality (Industry)
+    const [searchId, setSearchId] = useState('')
+    const [isSearching, setIsSearching] = useState(false)
+
     // Register Project Modal (NGO & Admin)
     const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
-    const [projectName, setProjectName] = useState('')
+    const [projectForm, setProjectForm] = useState({
+        name: '',
+        description: '',
+        location: '',
+        acres: ''
+    })
     const [isRegistering, setIsRegistering] = useState(false)
 
     // Issue Credit Modal (Admin only)
@@ -49,6 +58,7 @@ useEffect(() => {
         const [projects, credits] = await Promise.all([getProjects(), getCredits()])
 
         setAllProjects(projects)
+        setFilteredProjects(projects)
         setAllCredits(credits)
         setProjectsCount(projects.length)
 
@@ -83,16 +93,21 @@ useEffect(() => {
     // Handle Register Project (NGO & Admin)
     const handleRegisterProject = async (e) => {
         e.preventDefault()
-        if (!projectName.trim()) return
+        if (!projectForm.name.trim()) return
 
         setIsRegistering(true)
         setErrorMessage('')
         setSuccessMessage('')
         
-        const result = await registerProject(projectName)
+        const result = await registerProject(
+            projectForm.name,
+            projectForm.description,
+            projectForm.location,
+            projectForm.acres
+        )
         if (result.success) {
-            setSuccessMessage(`✅ Project "${projectName}" registered successfully!`)
-            setProjectName('')
+            setSuccessMessage(`✅ Project "${projectForm.name}" registered successfully!`)
+            setProjectForm({ name: '', description: '', location: '', acres: '' })
             setIsRegisterModalOpen(false)
             fetchDashboardData()
             setTimeout(() => setSuccessMessage(''), 3000)
@@ -100,6 +115,32 @@ useEffect(() => {
             setErrorMessage(result.error || 'Failed to register project')
         }
         setIsRegistering(false)
+    }
+
+    // Handle Search by Project ID (Industry)
+    const handleSearchProject = async () => {
+        if (!searchId.trim()) {
+            setFilteredProjects(allProjects)
+            return
+        }
+
+        setIsSearching(true)
+        const project = await searchProjectById(searchId)
+        
+        if (project) {
+            setFilteredProjects([project])
+        } else {
+            setFilteredProjects([])
+            setErrorMessage('Project not found')
+            setTimeout(() => setErrorMessage(''), 3000)
+        }
+        setIsSearching(false)
+    }
+
+    // Clear search
+    const handleClearSearch = () => {
+        setSearchId('')
+        setFilteredProjects(allProjects)
     }
 
     // Handle Issue Credit (Admin only)
@@ -375,21 +416,52 @@ useEffect(() => {
                             {isIndustry ? 'Available Projects' : 'Registered Projects'}
                         </h2>
 
+                        {/* Search Bar for Industries */}
+                        {isIndustry && (
+                            <div className="mb-6">
+                                <div className="flex gap-2">
+                                    <input
+                                        type="number"
+                                        value={searchId}
+                                        onChange={(e) => setSearchId(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleSearchProject()}
+                                        placeholder="Search by Project ID..."
+                                        className="flex-1 px-4 py-2 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                                    />
+                                    <button
+                                        onClick={handleSearchProject}
+                                        disabled={isSearching}
+                                        className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                                    >
+                                        {isSearching ? '...' : '🔍'}
+                                    </button>
+                                    {searchId && (
+                                        <button
+                                            onClick={handleClearSearch}
+                                            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="space-y-4 max-h-96 overflow-y-auto">
                             {loading && (
                                 <div className="text-center py-8 text-gray-400">Loading projects...</div>
                             )}
-                            {!loading && allProjects.length === 0 && (
+                            {!loading && filteredProjects.length === 0 && (
                                 <div className="text-center py-8 text-gray-400">
-                                    No projects found. {(isNGO || isAdmin) && 'Register one to get started!'}
+                                    {searchId ? 'No project found with that ID.' : 'No projects found.'} {(isNGO || isAdmin) && !searchId && 'Register one to get started!'}
                                 </div>
                             )}
-                            {allProjects.map((project) => (
+                            {filteredProjects.map((project) => (
                                 <div
                                     key={project.id}
                                     className="bg-ocean-900/30 border border-ocean-500/20 rounded-lg p-4 hover:border-teal-500/40 transition-all"
                                 >
-                                    <div className="flex items-start justify-between">
+                                    <div className="flex items-start justify-between mb-3">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
                                                 <span className="font-mono text-teal-400 font-bold">ID: {project.id}</span>
@@ -401,14 +473,36 @@ useEffect(() => {
                                                     {project.verified ? '✓ Verified' : '⏳ Pending'}
                                                 </span>
                                             </div>
-                                            <h3 className="text-lg font-semibold text-white mb-1">{project.name}</h3>
-                                            <p className="text-sm text-gray-400">Owner: {project.owner.substring(0, 10)}...{project.owner.substring(project.owner.length - 8)}</p>
+                                            <h3 className="text-lg font-semibold text-white mb-2">{project.name}</h3>
+                                            
+                                            {/* Project Details */}
+                                            {project.description && (
+                                                <p className="text-sm text-gray-300 mb-2 leading-relaxed">{project.description}</p>
+                                            )}
+                                            <div className="space-y-1 text-xs text-gray-400">
+                                                {project.location && (
+                                                    <div className="flex items-center gap-1">
+                                                        <span>📍</span>
+                                                        <span>Location: {project.location}</span>
+                                                    </div>
+                                                )}
+                                                {project.acres > 0 && (
+                                                    <div className="flex items-center gap-1">
+                                                        <span>🌾</span>
+                                                        <span>Area: {project.acres} acres</span>
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center gap-1">
+                                                    <span>👤</span>
+                                                    <span>Owner: {project.owner.substring(0, 10)}...{project.owner.substring(project.owner.length - 8)}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="flex flex-col gap-2">
                                             {isAdmin && !project.verified && (
                                                 <button
                                                     onClick={() => handleVerifyProject(project.id)}
-                                                    className="px-3 py-1 bg-teal-500 hover:bg-teal-600 text-white text-sm rounded transition-colors"
+                                                    className="px-3 py-1 bg-teal-500 hover:bg-teal-600 text-white text-sm rounded transition-colors whitespace-nowrap"
                                                 >
                                                     Verify
                                                 </button>
@@ -563,18 +657,57 @@ useEffect(() => {
                             )}
                             
                             <form onSubmit={handleRegisterProject}>
-                                <div className="mb-6">
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">Project Name</label>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Project Name *</label>
                                     <input
                                         type="text"
                                         required
-                                        value={projectName}
-                                        onChange={(e) => setProjectName(e.target.value)}
+                                        value={projectForm.name}
+                                        onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
                                         className="w-full px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
                                         placeholder="e.g., Mangrove Restoration 2026"
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">Enter a descriptive name for your carbon offset project</p>
                                 </div>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
+                                    <textarea
+                                        required
+                                        rows="3"
+                                        value={projectForm.description}
+                                        onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
+                                        className="w-full px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all resize-none"
+                                        placeholder="Describe your carbon offset project..."
+                                    />
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Location *</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={projectForm.location}
+                                        onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
+                                        className="w-full px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                                        placeholder="e.g., Sundarbans, West Bengal"
+                                    />
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Area (Acres) *</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="0.01"
+                                        step="0.01"
+                                        value={projectForm.acres}
+                                        onChange={(e) => setProjectForm({ ...projectForm, acres: e.target.value })}
+                                        className="w-full px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                                        placeholder="e.g., 100"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Total land area for plantation</p>
+                                </div>
+                                
                                 <button
                                     type="submit"
                                     disabled={isRegistering}

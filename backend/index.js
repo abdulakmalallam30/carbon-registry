@@ -22,6 +22,10 @@ const contractAddress = process.env.CONTRACT_ADDRESS;
 const contractABI = JSON.parse(fs.readFileSync("./abi.json", "utf8"));
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
+// In-memory storage for project metadata (description, location, acres)
+// In production, use a real database like MongoDB or PostgreSQL
+const projectMetadata = new Map();
+
 // Routes
 app.get("/", (req, res) => {
   res.send("Backend running");
@@ -40,15 +44,31 @@ app.get("/accounts", async (req, res) => {
 // Register a new carbon-offset project
 app.post("/register-project", async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, description, location, acres } = req.body;
     const accounts = await web3.eth.getAccounts();
 
+    // Register on blockchain (only name is stored on-chain)
     const tx = await contract.methods.registerProject(name).send({
       from: accounts[0],
       gas: 3000000,
     });
 
-    res.json({ success: true, txHash: tx.transactionHash });
+    // Get the project ID from the event or project count
+    const projectCount = await contract.methods.projectCount().call();
+    const projectId = projectCount.toString();
+
+    // Store additional metadata off-chain
+    projectMetadata.set(projectId, {
+      description: description || '',
+      location: location || '',
+      acres: acres || 0
+    });
+
+    res.json({ 
+      success: true, 
+      txHash: tx.transactionHash,
+      projectId: projectId 
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -62,15 +82,51 @@ app.get("/projects", async (req, res) => {
 
     for (let i = 1; i <= count; i++) {
       const p = await contract.methods.getProject(i).call();
+      const projectId = (p.id !== undefined ? p.id : p[0]).toString();
+      const metadata = projectMetadata.get(projectId) || { description: '', location: '', acres: 0 };
+      
       projects.push({
-        id: (p.id !== undefined ? p.id : p[0]).toString(),
+        id: projectId,
         name: p.name !== undefined ? p.name : p[1],
         owner: p.owner !== undefined ? p.owner : p[2],
-        verified: p.verified !== undefined ? p.verified : p[3]
+        verified: p.verified !== undefined ? p.verified : p[3],
+        description: metadata.description,
+        location: metadata.location,
+        acres: metadata.acres
       });
     }
 
     res.json(projects);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Search project by ID
+app.get("/projects/:id", async (req, res) => {
+  try {
+    const projectId = req.params.id;
+    const count = await contract.methods.projectCount().call();
+    
+    if (projectId < 1 || projectId > count) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    const p = await contract.methods.getProject(projectId).call();
+    const metadata = projectMetadata.get(projectId) || { description: '', location: '', acres: 0 };
+    
+    const project = {
+      id: (p.id !== undefined ? p.id : p[0]).toString(),
+      name: p.name !== undefined ? p.name : p[1],
+      owner: p.owner !== undefined ? p.owner : p[2],
+      verified: p.verified !== undefined ? p.verified : p[3],
+      description: metadata.description,
+      location: metadata.location,
+      acres: metadata.acres
+    };
+
+    res.json(project);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
