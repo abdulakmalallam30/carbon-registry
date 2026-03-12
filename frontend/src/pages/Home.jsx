@@ -81,7 +81,7 @@ const Home = () => {
           variants={containerVariants}
         >
           <motion.h1
-            className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent drop-shadow-2xl uppercase"
+            className="text-4xl sm:text-6xl lg:text-7xl font-black mb-8 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent drop-shadow-2xl uppercase whitespace-nowrap"
             style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900', letterSpacing: '0.02em', WebkitTextStroke: '1px rgba(255,255,255,0.1)' }}
             variants={itemVariants}
           >
@@ -89,20 +89,59 @@ const Home = () => {
           </motion.h1>
 
           <motion.p
-            className="text-xl sm:text-2xl text-white mb-4 font-black drop-shadow-lg"
+            className="text-xl sm:text-2xl text-white mb-8 font-black drop-shadow-lg"
             style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}
             variants={itemVariants}
           >
-            A transparent digital system to register, monitor, and verify blue carbon ecosystem projects.
+            A transparent digital system to:
           </motion.p>
 
-          <motion.p
-            className="text-lg text-sky-400 mb-12 font-black drop-shadow-md"
-            style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto"
             variants={itemVariants}
           >
-            Protecting coastal ecosystems through technology and transparency.
-          </motion.p>
+            <motion.div
+              className="bg-gradient-to-br from-cyan-500/20 to-blue-500/10 backdrop-blur-sm border border-cyan-500/30 rounded-2xl p-6 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+            >
+              <div className="text-4xl mb-3">📝</div>
+              <h3 className="text-2xl font-black text-white drop-shadow-lg" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}>
+                REGISTER
+              </h3>
+              <p className="text-sm text-cyan-300 mt-2 font-bold">Blue Carbon Ecosystem</p>
+            </motion.div>
+
+            <motion.div
+              className="bg-gradient-to-br from-sky-500/20 to-blue-500/10 backdrop-blur-sm border border-sky-500/30 rounded-2xl p-6 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+            >
+              <div className="text-4xl mb-3">📊</div>
+              <h3 className="text-2xl font-black text-white drop-shadow-lg" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}>
+                MONITOR
+              </h3>
+              <p className="text-sm text-sky-300 mt-2 font-bold">Blue Carbon Ecosystem</p>
+            </motion.div>
+
+            <motion.div
+              className="bg-gradient-to-br from-blue-500/20 to-indigo-500/10 backdrop-blur-sm border border-blue-500/30 rounded-2xl p-6 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+            >
+              <div className="text-4xl mb-3">✅</div>
+              <h3 className="text-2xl font-black text-white drop-shadow-lg" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}>
+                VERIFY
+              </h3>
+              <p className="text-sm text-blue-300 mt-2 font-bold">Blue Carbon Ecosystem</p>
+            </motion.div>
+          </motion.div>
 
           <motion.div
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
