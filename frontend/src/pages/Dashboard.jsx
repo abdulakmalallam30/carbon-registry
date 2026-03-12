@@ -69,10 +69,71 @@ const Dashboard = () => {
     // Statistics View
     const [showStatistics, setShowStatistics] = useState(false)
 
+    // Location Tracking (Admin & Industry)
+    const [userLocation, setUserLocation] = useState(null)
+    const [locationError, setLocationError] = useState('')
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+    const [showLocationCard, setShowLocationCard] = useState(false)
+
     const [errorMessage, setErrorMessage] = useState('')
     const [successMessage, setSuccessMessage] = useState('')
 
-useEffect(() => {
+    useEffect(() => {
+        fetchDashboardData()
+        fetchAccounts()
+        // Auto-fetch location for Admin and Industry on mount
+        if (isAdmin || isIndustry) {
+            getCurrentLocation()
+        }
+    }, [isAdmin, isIndustry])
+
+    // Get current location using browser's Geolocation API
+    const getCurrentLocation = () => {
+        setIsLoadingLocation(true)
+        setLocationError('')
+
+        if (!navigator.geolocation) {
+            setLocationError('Geolocation is not supported by your browser')
+            setIsLoadingLocation(false)
+            return
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setUserLocation({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy,
+                    timestamp: new Date(position.timestamp).toLocaleString()
+                })
+                setIsLoadingLocation(false)
+                setShowLocationCard(true)
+            },
+            (error) => {
+                let errorMsg = 'Unable to retrieve location'
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMsg = 'Location permission denied. Please enable location access.'
+                        break
+                    case error.POSITION_UNAVAILABLE:
+                        errorMsg = 'Location information unavailable.'
+                        break
+                    case error.TIMEOUT:
+                        errorMsg = 'Location request timed out.'
+                        break
+                }
+                setLocationError(errorMsg)
+                setIsLoadingLocation(false)
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        )
+    }
+
+    useEffect(() => {
         fetchDashboardData()
         fetchAccounts()
     }, [])
@@ -502,6 +563,129 @@ useEffect(() => {
                     ))}
                 </motion.div>
 
+                {/* Location Tracking Card - Admin & Industry Only */}
+                {(isAdmin || isIndustry) && (
+                    <AnimatePresence>
+                        {showLocationCard && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -20, height: 0 }}
+                                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                                exit={{ opacity: 0, y: -20, height: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="mb-8 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 backdrop-blur-md border-2 border-cyan-400/30 rounded-2xl p-6 relative overflow-hidden"
+                            >
+                                {/* Close button */}
+                                <button 
+                                    onClick={() => setShowLocationCard(false)}
+                                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+
+                                <div className="flex items-start space-x-4">
+                                    {/* Icon */}
+                                    <div className="text-5xl">📍</div>
+                                    
+                                    {/* Content */}
+                                    <div className="flex-1">
+                                        <h3 className="text-2xl font-bold text-white mb-2">Current Location Tracking</h3>
+                                        
+                                        {isLoadingLocation ? (
+                                            <div className="flex items-center space-x-3 text-cyan-300">
+                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-cyan-400"></div>
+                                                <span>Getting your location...</span>
+                                            </div>
+                                        ) : locationError ? (
+                                            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4">
+                                                <div className="flex items-start space-x-2">
+                                                    <span className="text-2xl">⚠️</span>
+                                                    <div>
+                                                        <p className="text-red-300 font-medium mb-2">{locationError}</p>
+                                                        <button 
+                                                            onClick={getCurrentLocation}
+                                                            className="px-4 py-2 bg-red-500/30 hover:bg-red-500/40 border border-red-400/50 text-white rounded-lg transition-all"
+                                                        >
+                                                            Try Again
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : userLocation ? (
+                                            <div className="space-y-4">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {/* Latitude */}
+                                                    <div className="bg-black/20 rounded-lg p-4 border border-cyan-400/20">
+                                                        <div className="text-sm text-gray-400 mb-1">Latitude</div>
+                                                        <div className="text-xl font-mono text-cyan-300">
+                                                            {userLocation.latitude.toFixed(6)}°
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Longitude */}
+                                                    <div className="bg-black/20 rounded-lg p-4 border border-cyan-400/20">
+                                                        <div className="text-sm text-gray-400 mb-1">Longitude</div>
+                                                        <div className="text-xl font-mono text-cyan-300">
+                                                            {userLocation.longitude.toFixed(6)}°
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Accuracy */}
+                                                    <div className="bg-black/20 rounded-lg p-4 border border-cyan-400/20">
+                                                        <div className="text-sm text-gray-400 mb-1">Accuracy</div>
+                                                        <div className="text-xl font-mono text-green-400">
+                                                            ±{Math.round(userLocation.accuracy)} meters
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Timestamp */}
+                                                    <div className="bg-black/20 rounded-lg p-4 border border-cyan-400/20">
+                                                        <div className="text-sm text-gray-400 mb-1">Retrieved</div>
+                                                        <div className="text-sm font-mono text-blue-300">
+                                                            {userLocation.timestamp}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Google Maps Link */}
+                                                <div className="flex items-center space-x-3">
+                                                    <a 
+                                                        href={`https://www.google.com/maps?q=${userLocation.latitude},${userLocation.longitude}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500/30 to-emerald-500/30 hover:from-green-500/40 hover:to-emerald-500/40 border border-green-400/50 text-white rounded-lg transition-all flex items-center justify-center space-x-2"
+                                                    >
+                                                        <span>🗺️</span>
+                                                        <span>View on Google Maps</span>
+                                                    </a>
+                                                    
+                                                    <button 
+                                                        onClick={getCurrentLocation}
+                                                        className="px-4 py-3 bg-cyan-500/30 hover:bg-cyan-500/40 border border-cyan-400/50 text-white rounded-lg transition-all"
+                                                        title="Refresh location"
+                                                    >
+                                                        🔄 Refresh
+                                                    </button>
+                                                </div>
+
+                                                {/* Info note */}
+                                                <div className="flex items-start space-x-2 text-xs text-gray-400 bg-black/20 rounded-lg p-3">
+                                                    <span>ℹ️</span>
+                                                    <span>
+                                                        This location can be used when registering new projects to track exact coordinates.
+                                                        Make sure you're at the project site for accurate tracking.
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                )}
+
                 {/* Role-based action buttons */}
                 <div className="mb-8 flex gap-4 flex-wrap">
                     {(isNGO || isAdmin) && (
@@ -544,6 +728,23 @@ useEffect(() => {
                     >
                         {showStatistics ? '📊 Hide Statistics' : '📊 View Impact Statistics'}
                     </motion.button>
+
+                    {/* Location Tracking Button - Admin & Industry Only */}
+                    {(isAdmin || isIndustry) && (
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                                setShowLocationCard(!showLocationCard)
+                                if (!showLocationCard && !userLocation && !isLoadingLocation) {
+                                    getCurrentLocation()
+                                }
+                            }}
+                            className={`px-6 py-3 ${showLocationCard ? 'bg-gradient-to-r from-cyan-600 to-blue-700' : 'bg-gradient-to-r from-cyan-500 to-blue-600'} text-white font-semibold rounded-lg shadow-lg hover:from-cyan-400 hover:to-blue-500 transition-all`}
+                        >
+                            {showLocationCard ? '📍 Hide Location' : '📍 Track Location'}
+                        </motion.button>
+                    )}
 
                     {/* Transaction History Button */}
                     <motion.button
@@ -906,7 +1107,21 @@ useEffect(() => {
                                                     {project.location && (
                                                         <div className="flex items-center gap-1">
                                                             <span>📍</span>
-                                                            <span>Location: {project.location}</span>
+                                                            <span>Location: </span>
+                                                            {/* Check if location contains GPS coordinates (format: "lat, lng") */}
+                                                            {project.location.match(/^-?\d+\.\d+,\s*-?\d+\.\d+$/) ? (
+                                                                <a 
+                                                                    href={`https://www.google.com/maps?q=${project.location}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-cyan-400 hover:text-cyan-300 underline font-mono"
+                                                                    title="View on Google Maps"
+                                                                >
+                                                                    {project.location} 🗺️
+                                                                </a>
+                                                            ) : (
+                                                                <span>{project.location}</span>
+                                                            )}
                                                         </div>
                                                     )}
                                                     {project.acres > 0 && (
@@ -1012,6 +1227,24 @@ useEffect(() => {
                                         <p className="text-sm text-gray-400 mb-1">
                                             Project: {project ? project.name : `Unknown (ID: ${credit.projectId})`}
                                         </p>
+                                        {project && project.location && (
+                                            <p className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                                                <span>📍</span>
+                                                {project.location.match(/^-?\d+\.\d+,\s*-?\d+\.\d+$/) ? (
+                                                    <a 
+                                                        href={`https://www.google.com/maps?q=${project.location}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-cyan-400 hover:text-cyan-300 underline font-mono"
+                                                        title="View on Google Maps"
+                                                    >
+                                                        {project.location} 🗺️
+                                                    </a>
+                                                ) : (
+                                                    <span>{project.location}</span>
+                                                )}
+                                            </p>
+                                        )}
                                         <p className="text-xs text-gray-500">
                                             Owner: {credit.owner.substring(0, 10)}...{credit.owner.substring(credit.owner.length - 8)}
                                         </p>
@@ -1141,14 +1374,34 @@ useEffect(() => {
 
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-300 mb-2">Location *</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={projectForm.location}
-                                        onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
-                                        className="w-full px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
-                                        placeholder="e.g., Sundarbans, West Bengal"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            required
+                                            value={projectForm.location}
+                                            onChange={(e) => setProjectForm({ ...projectForm, location: e.target.value })}
+                                            className="w-full px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                                            placeholder="e.g., Sundarbans, West Bengal"
+                                        />
+                                        {userLocation && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const coords = `${userLocation.latitude.toFixed(6)}, ${userLocation.longitude.toFixed(6)}`
+                                                    setProjectForm({ ...projectForm, location: coords })
+                                                }}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-cyan-500/30 hover:bg-cyan-500/50 border border-cyan-400/50 text-cyan-300 text-sm rounded transition-all"
+                                                title="Use tracked GPS coordinates"
+                                            >
+                                                📍 Use GPS
+                                            </button>
+                                        )}
+                                    </div>
+                                    {userLocation && (
+                                        <p className="text-xs text-cyan-400 mt-1">
+                                            GPS available: {userLocation.latitude.toFixed(6)}, {userLocation.longitude.toFixed(6)}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="mb-6">
