@@ -81,7 +81,7 @@ const Home = () => {
           variants={containerVariants}
         >
           <motion.h1
-            className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent drop-shadow-2xl"
+            className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent drop-shadow-2xl"
             style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.02em' }}
             variants={itemVariants}
           >
@@ -97,7 +97,7 @@ const Home = () => {
           </motion.p>
 
           <motion.p
-            className="text-lg text-pink-400 mb-12 font-semibold drop-shadow-md"
+            className="text-lg text-sky-400 mb-12 font-semibold drop-shadow-md"
             style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
             variants={itemVariants}
           >
@@ -109,7 +109,7 @@ const Home = () => {
             variants={itemVariants}
           >
             <motion.button
-              className="px-8 py-4 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 text-white font-bold rounded-xl shadow-xl shadow-pink-500/40 hover:shadow-pink-500/70 transition-all"
+              className="px-8 py-4 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 text-white font-bold rounded-xl shadow-xl shadow-blue-500/40 hover:shadow-blue-500/70 transition-all"
               style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -119,7 +119,7 @@ const Home = () => {
 
             <Link to="/about">
               <motion.button
-                className="px-8 py-4 border-2 border-purple-400 text-white font-bold rounded-xl hover:bg-purple-500/20 hover:border-purple-300 transition-all backdrop-blur-sm"
+                className="px-8 py-4 border-2 border-blue-400 text-white font-bold rounded-xl hover:bg-blue-500/20 hover:border-blue-300 transition-all backdrop-blur-sm"
                 style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -140,16 +140,16 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               What is Blue Carbon?
             </h2>
             
-            <div className="bg-gradient-to-br from-orange-500/10 to-pink-500/5 backdrop-blur-sm border border-orange-500/20 rounded-2xl p-8 sm:p-12">
+            <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/5 backdrop-blur-sm border border-cyan-500/20 rounded-2xl p-8 sm:p-12">
               <p className="text-lg text-white leading-relaxed text-center max-w-4xl mx-auto drop-shadow-md" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 Blue carbon refers to carbon captured by ocean and coastal ecosystems, particularly 
-                <span className="text-orange-400 font-bold"> mangroves</span>, 
-                <span className="text-yellow-400 font-bold"> seagrasses</span>, and 
-                <span className="text-pink-400 font-bold"> salt marshes</span>. 
+                <span className="text-cyan-400 font-bold"> mangroves</span>, 
+                <span className="text-sky-400 font-bold"> seagrasses</span>, and 
+                <span className="text-blue-400 font-bold"> salt marshes</span>. 
                 These ecosystems are among the most effective carbon sinks on Earth, capable of storing 
                 carbon for thousands of years in their sediments. Despite covering less than 2% of the 
                 ocean floor, they account for roughly half of all carbon sequestered in ocean sediments.
@@ -161,7 +161,7 @@ const Home = () => {
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="text-5xl font-extrabold text-yellow-400 mb-2 drop-shadow-lg" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>5-10×</div>
+                  <div className="text-5xl font-extrabold text-cyan-400 mb-2 drop-shadow-lg" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>5-10×</div>
                   <div className="text-gray-100 text-sm font-medium">More carbon storage than terrestrial forests</div>
                 </motion.div>
 
@@ -170,7 +170,7 @@ const Home = () => {
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="text-5xl font-extrabold text-orange-400 mb-2 drop-shadow-lg" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>50%</div>
+                  <div className="text-5xl font-extrabold text-sky-400 mb-2 drop-shadow-lg" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>50%</div>
                   <div className="text-gray-100 text-sm font-medium">Of ocean carbon buried in sediments</div>
                 </motion.div>
 
@@ -179,7 +179,7 @@ const Home = () => {
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="text-5xl font-extrabold text-pink-400 mb-2 drop-shadow-lg" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>1000s</div>
+                  <div className="text-5xl font-extrabold text-blue-400 mb-2 drop-shadow-lg" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>1000s</div>
                   <div className="text-gray-100 text-sm font-medium">Years of carbon storage capacity</div>
                 </motion.div>
               </div>
@@ -197,7 +197,7 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-purple-400 via-pink-500 to-rose-500 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-blue-400 via-indigo-500 to-cyan-600 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               Why a Registry?
             </h2>
 
@@ -214,8 +214,8 @@ const Home = () => {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 whileHover={{ y: -10 }}
               >
-                <div className="h-full bg-gradient-to-br from-purple-500/10 to-transparent backdrop-blur-sm border border-purple-500/20 rounded-xl p-8 group-hover:border-purple-500/40 transition-colors">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30">
+                <div className="h-full bg-gradient-to-br from-cyan-500/10 to-transparent backdrop-blur-sm border border-cyan-500/20 rounded-xl p-8 group-hover:border-cyan-500/40 transition-colors">
+                  <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-cyan-500/30">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
@@ -236,8 +236,8 @@ const Home = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 whileHover={{ y: -10 }}
               >
-                <div className="h-full bg-gradient-to-br from-pink-500/10 to-transparent backdrop-blur-sm border border-pink-500/20 rounded-xl p-8 group-hover:border-pink-500/40 transition-colors">
-                  <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-pink-500/30">
+                <div className="h-full bg-gradient-to-br from-sky-500/10 to-transparent backdrop-blur-sm border border-sky-500/20 rounded-xl p-8 group-hover:border-sky-500/40 transition-colors">
+                  <div className="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-sky-500/30">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
@@ -259,7 +259,7 @@ const Home = () => {
                 whileHover={{ y: -10 }}
               >
                 <div className="h-full bg-gradient-to-br from-indigo-500/10 to-transparent backdrop-blur-sm border border-indigo-500/20 rounded-xl p-8 group-hover:border-indigo-500/40 transition-colors">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30">
+                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/30">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
@@ -285,7 +285,7 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: '"Vipnagorgialla", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               Key Features
             </h2>
 
@@ -304,9 +304,9 @@ const Home = () => {
                   whileHover={{ scale: 1.05, rotate: 1 }}
                   className="group"
                 >
-                  <div className="h-full bg-gradient-to-br from-purple-500/10 to-pink-500/5 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-8 text-center group-hover:border-pink-500/40 group-hover:shadow-xl group-hover:shadow-purple-500/10 transition-all">
+                  <div className="h-full bg-gradient-to-br from-blue-500/10 to-sky-500/5 backdrop-blur-sm border border-blue-500/20 rounded-2xl p-8 text-center group-hover:border-sky-500/40 group-hover:shadow-xl group-hover:shadow-blue-500/10 transition-all">
                     <motion.div
-                      className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl mb-6 text-pink-300"
+                      className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500/20 to-sky-500/20 rounded-2xl mb-6 text-sky-300"
                       whileHover={{ rotate: 360 }}
                       transition={{ duration: 0.6 }}
                     >
