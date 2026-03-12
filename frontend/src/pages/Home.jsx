@@ -171,7 +171,7 @@ const Home = () => {
             </motion.div>
           </motion.div>
 
-          {/* Live Stats Counter */}
+          {/* Blue Carbon Facts */}
           <motion.div
             className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto mb-12"
             variants={itemVariants}
@@ -186,9 +186,10 @@ const Home = () => {
                 animate={{ opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                247+
+                10×
               </motion.div>
-              <div className="text-xs text-gray-300 font-bold uppercase">Projects</div>
+              <div className="text-xs text-gray-300 font-bold uppercase">More Carbon Storage</div>
+              <div className="text-xs text-gray-400 mt-1">vs Forests</div>
             </motion.div>
 
             <motion.div 
@@ -201,9 +202,10 @@ const Home = () => {
                 animate={{ opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
               >
-                1.2M
+                50%
               </motion.div>
-              <div className="text-xs text-gray-300 font-bold uppercase">Tons CO₂</div>
+              <div className="text-xs text-gray-300 font-bold uppercase">Ocean Carbon</div>
+              <div className="text-xs text-gray-400 mt-1">Buried Here</div>
             </motion.div>
 
             <motion.div 
@@ -216,9 +218,10 @@ const Home = () => {
                 animate={{ opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
               >
-                89
+                &lt;2%
               </motion.div>
-              <div className="text-xs text-gray-300 font-bold uppercase">Countries</div>
+              <div className="text-xs text-gray-300 font-bold uppercase">Ocean Floor</div>
+              <div className="text-xs text-gray-400 mt-1">Coverage</div>
             </motion.div>
 
             <motion.div 
@@ -231,9 +234,10 @@ const Home = () => {
                 animate={{ opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 2, repeat: Infinity, delay: 0.9 }}
               >
-                24/7
+                1000+
               </motion.div>
-              <div className="text-xs text-gray-300 font-bold uppercase">Monitoring</div>
+              <div className="text-xs text-gray-300 font-bold uppercase">Years Storage</div>
+              <div className="text-xs text-gray-400 mt-1">Capacity</div>
             </motion.div>
           </motion.div>
 
