@@ -204,14 +204,14 @@ const LiquidEther = ({
 
     // Cleanup
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('resize', handleResize)
       if (containerRef.current && renderer.domElement) {
         containerRef.current.removeChild(renderer.domElement)
-      }resize', handleResize)
-      if (containerRef.current && renderer.domElement) {
-        containerRef.current.removeChild(renderer.domElement)
       }
+      geometry.dispose()
+      material.dispose()
+      renderer.dispose()
+    }
   }, [colors, mouseForce, cursorSize, isViscous, viscous, resolution, autoDemo, autoSpeed, autoIntensity, color0, color1, color2])
 
   return (
