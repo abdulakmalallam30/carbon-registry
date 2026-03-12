@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import LiquidEther from '../components/LiquidEther'
+import introVideo from '../intro 1.mp4'
 
 const Home = () => {
   const containerVariants = {
@@ -55,30 +55,19 @@ const Home = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Liquid Ether Background */}
-      <div className="fixed top-0 left-0 w-full h-full -z-10">
-        <LiquidEther
-          colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-          mouseForce={20}
-          cursorSize={100}
-          resolution={0.5}
-          dt={0.014}
-          BFECC={true}
-          isViscous={true}
-          viscous={30}
-          iterationsViscous={32}
-          iterationsPoisson={32}
-          isBounce={false}
-          autoDemo={false}
-          autoSpeed={0.3}
-          autoIntensity={2.2}
-          takeoverDuration={0}
-          autoResumeDelay={0}
-          autoRampDuration={0}
-          color0="#5227FF"
-          color1="#FF9FFC"
-          color2="#B19EEF"
-        />
+      {/* Video Background */}
+      <div className="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full w-auto h-auto object-cover"
+        >
+          <source src={introVideo} type="video/mp4" />
+        </video>
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/30"></div>
       </div>
       
       {/* Content */}
