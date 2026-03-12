@@ -161,35 +161,8 @@ const LiquidEther = ({
     const mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
 
-    // Mouse tracking
-    const handleMouseMove = (event) => {
-      const rect = containerRef.current.getBoundingClientRect()
-      mouseRef.current.x = (event.clientX - rect.left) / width
-      mouseRef.current.y = 1.0 - (event.clientY - rect.top) / height
-    }
-
-    // Auto demo animation
+    // Auto demo animation only - no mouse interaction
     let autoTime = 0
-    let isUserInteracting = false
-    let resumeTimeout = null
-
-    const handleMouseEnter = () => {
-      isUserInteracting = true
-      if (resumeTimeout) clearTimeout(resumeTimeout)
-    }
-
-    const handleMouseLeave = () => {
-      isUserInteracting = false
-      if (autoDemo) {
-        resumeTimeout = setTimeout(() => {
-          isUserInteracting = false
-        }, autoResumeDelay)
-      }
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    containerRef.current.addEventListener('mouseenter', handleMouseEnter)
-    containerRef.current.addEventListener('mouseleave', handleMouseLeave)
 
     // Animation loop
     const animate = () => {
@@ -197,14 +170,10 @@ const LiquidEther = ({
 
       timeRef.current += 0.01
 
-      if (autoDemo && !isUserInteracting) {
-        autoTime += 0.01 * autoSpeed
-        material.uniforms.mouse.value.x = 0.5 + Math.sin(autoTime) * 0.3
-        material.uniforms.mouse.value.y = 0.5 + Math.cos(autoTime * 0.7) * 0.3
-      } else {
-        material.uniforms.mouse.value.x = mouseRef.current.x
-        material.uniforms.mouse.value.y = mouseRef.current.y
-      }
+      // Always use auto demo - ignore mouse
+      autoTime += 0.01 * autoSpeed
+      material.uniforms.mouse.value.x = 0.5 + Math.sin(autoTime) * 0.2
+      material.uniforms.mouse.value.y = 0.5 + Math.cos(autoTime * 0.7) * 0.2
 
       material.uniforms.time.value = timeRef.current
 
@@ -239,12 +208,10 @@ const LiquidEther = ({
       window.removeEventListener('resize', handleResize)
       if (containerRef.current && renderer.domElement) {
         containerRef.current.removeChild(renderer.domElement)
+      }resize', handleResize)
+      if (containerRef.current && renderer.domElement) {
+        containerRef.current.removeChild(renderer.domElement)
       }
-      if (resumeTimeout) clearTimeout(resumeTimeout)
-      geometry.dispose()
-      material.dispose()
-      renderer.dispose()
-    }
   }, [colors, mouseForce, cursorSize, isViscous, viscous, resolution, autoDemo, autoSpeed, autoIntensity, color0, color1, color2])
 
   return (
