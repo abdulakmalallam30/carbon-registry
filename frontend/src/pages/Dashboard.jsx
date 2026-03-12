@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getProjects, getCredits, issueCredit, getAccounts, verifyProject, registerProject, retireCredit, searchProjectById } from '../services/api'
+import { getProjects, getCredits, issueCredit, getAccounts, verifyProject, registerProject, retireCredit, searchProjectById, filterProjects, updateProjectStatus, getTransactions } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 
 const Dashboard = () => {
@@ -39,6 +39,31 @@ const Dashboard = () => {
     const [isRetireModalOpen, setIsRetireModalOpen] = useState(false)
     const [retireForm, setRetireForm] = useState({ creditId: '' })
     const [isRetiring, setIsRetiring] = useState(false)
+
+    // Advanced Filtering & Sorting
+    const [filters, setFilters] = useState({
+        location: '',
+        minAcres: '',
+        maxAcres: '',
+        status: [],
+        hasCredits: false,
+        sortBy: 'newest',
+        sortOrder: 'desc'
+    })
+    const [showFilters, setShowFilters] = useState(false)
+    const [isFiltering, setIsFiltering] = useState(false)
+
+    // Status Management (Admin only)
+    const [statusModalOpen, setStatusModalOpen] = useState(false)
+    const [selectedProject, setSelectedProject] = useState(null)
+    const [newStatus, setNewStatus] = useState('')
+    const [rejectionReason, setRejectionReason] = useState('')
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+
+    // Transaction History
+    const [transactions, setTransactions] = useState([])
+    const [showTransactions, setShowTransactions] = useState(false)
+    const [isLoadingTransactions, setIsLoadingTransactions] = useState(false)
 
     const [errorMessage, setErrorMessage] = useState('')
     const [successMessage, setSuccessMessage] = useState('')
@@ -88,6 +113,109 @@ useEffect(() => {
         setCreditsRetired(retired.toString())
         setRecentActivity(activity.reverse().slice(0, 5))
         setLoading(false)
+    }
+
+    // Apply Advanced Filters
+    const handleApplyFilters = async () => {
+        setIsFiltering(true)
+        const filtered = await filterProjects(filters)
+        setFilteredProjects(filtered)
+        setIsFiltering(false)
+    }
+
+    // Clear all filters
+    const handleClearFilters = async () => {
+        setFilters({
+            location: '',
+            minAcres: '',
+            maxAcres: '',
+            status: [],
+            hasCredits: false,
+            sortBy: 'newest',
+            sortOrder: 'desc'
+        })
+        setFilteredProjects(allProjects)
+    }
+
+    // Handle Status Update (Admin only)
+    const handleUpdateStatus = async (e) => {
+        e.preventDefault()
+        if (!selectedProject || !newStatus) return
+
+        setIsUpdatingStatus(true)
+        setErrorMessage('')
+        setSuccessMessage('')
+
+        const result = await updateProjectStatus(selectedProject.id, newStatus, rejectionReason)
+        if (result.success) {
+            setSuccessMessage(`✅ Project status updated to ${newStatus}!`)
+            setStatusModalOpen(false)
+            setSelectedProject(null)
+            setNewStatus('')
+            setRejectionReason('')
+            fetchDashboardData()
+            setTimeout(() => setSuccessMessage(''), 3000)
+        } else {
+            setErrorMessage(result.error || 'Failed to update status')
+        }
+        setIsUpdatingStatus(false)
+    }
+
+    // Load Transaction History
+    const handleLoadTransactions = async () => {
+        setIsLoadingTransactions(true)
+        const txs = await getTransactions()
+        setTransactions(txs)
+        setShowTransactions(true)
+        setIsLoadingTransactions(false)
+    }
+
+    // Export Transactions to CSV
+    const handleExportTransactions = () => {
+        if (transactions.length === 0) {
+            alert('No transactions to export')
+            return
+        }
+
+        const headers = ['Type', 'Project ID', 'Project Name', 'Credit ID', 'Amount', 'From', 'To', 'TX Hash', 'Timestamp', 'Rejection Reason']
+        const rows = transactions.map(tx => [
+            tx.type,
+            tx.projectId || '',
+            tx.projectName || '',
+            tx.creditId || '',
+            tx.amount || '',
+            tx.from || '',
+            tx.to || '',
+            tx.txHash || '',
+            tx.timestamp,
+            tx.rejectionReason || ''
+        ])
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n')
+
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `carbon-registry-transactions-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+    }
+
+    // Get status badge color
+    const getStatusBadge = (status) => {
+        const badges = {
+            'pending': { bg: 'bg-yellow-500/20', text: 'text-yellow-300', border: 'border-yellow-500/30', icon: '⏳', label: 'Pending' },
+            'under-review': { bg: 'bg-blue-500/20', text: 'text-blue-300', border: 'border-blue-500/30', icon: '🔍', label: 'Under Review' },
+            'verified': { bg: 'bg-teal-500/20', text: 'text-teal-300', border: 'border-teal-500/30', icon: '✓', label: 'Verified' },
+            'rejected': { bg: 'bg-red-500/20', text: 'text-red-300', border: 'border-red-500/30', icon: '✗', label: 'Rejected' }
+        }
+        return badges[status] || badges['pending']
     }
 
     // Handle Register Project (NGO & Admin)
@@ -404,6 +532,237 @@ useEffect(() => {
                     )}
                 </div>
 
+                {/* Advanced Filters Panel */}
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8 bg-blue-deep/40 backdrop-blur-md border border-ocean-500/20 rounded-2xl overflow-hidden"
+                >
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="w-full px-6 py-4 flex items-center justify-between text-white hover:bg-teal-500/10 transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                            <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                            <span className="font-semibold">Advanced Filters & Sorting</span>
+                        </div>
+                        <svg className={`w-5 h-5 transition-transform ${showFilters ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <AnimatePresence>
+                        {showFilters && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="border-t border-ocean-500/20"
+                            >
+                                <div className="p-6 space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {/* Location Filter */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">📍 Location</label>
+                                            <input
+                                                type="text"
+                                                value={filters.location}
+                                                onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+                                                placeholder="e.g., Sundarbans, Delhi"
+                                                className="w-full px-4 py-2 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                                            />
+                                        </div>
+
+                                        {/* Min Acres */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">🌾 Min Acres</label>
+                                            <input
+                                                type="number"
+                                                value={filters.minAcres}
+                                                onChange={(e) => setFilters({ ...filters, minAcres: e.target.value })}
+                                                placeholder="e.g., 10"
+                                                min="0"
+                                                className="w-full px-4 py-2 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                                            />
+                                        </div>
+
+                                        {/* Max Acres */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">🌾 Max Acres</label>
+                                            <input
+                                                type="number"
+                                                value={filters.maxAcres}
+                                                onChange={(e) => setFilters({ ...filters, maxAcres: e.target.value })}
+                                                placeholder="e.g., 1000"
+                                                min="0"
+                                                className="w-full px-4 py-2 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                                            />
+                                        </div>
+
+                                        {/* Sort By */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">🔀 Sort By</label>
+                                            <select
+                                                value={filters.sortBy}
+                                                onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
+                                                className="w-full px-4 py-2 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                                            >
+                                                <option value="newest">Newest First</option>
+                                                <option value="oldest">Oldest First</option>
+                                                <option value="credits">Most Credits</option>
+                                                <option value="acres">Largest Area</option>
+                                                <option value="name">Name (A-Z)</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Status Filter */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">📊 Status</label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {['pending', 'under-review', 'verified', 'rejected'].map(status => (
+                                                    <button
+                                                        key={status}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const newStatuses = filters.status.includes(status)
+                                                                ? filters.status.filter(s => s !== status)
+                                                                : [...filters.status, status]
+                                                            setFilters({ ...filters, status: newStatuses })
+                                                        }}
+                                                        className={`px-3 py-1 text-xs rounded-lg transition-all ${
+                                                            filters.status.includes(status)
+                                                                ? 'bg-teal-500 text-white'
+                                                                : 'bg-ocean-900/50 text-gray-400 hover:bg-ocean-800/50'
+                                                        }`}
+                                                    >
+                                                        {status.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Has Credits Checkbox */}
+                                        <div className="flex items-center">
+                                            <label className="flex items-center space-x-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={filters.hasCredits}
+                                                    onChange={(e) => setFilters({ ...filters, hasCredits: e.target.checked })}
+                                                    className="w-4 h-4 rounded border-ocean-500/30 bg-ocean-900/50 text-teal-500 focus:ring-teal-500 focus:ring-offset-0"
+                                                />
+                                                <span className="text-sm text-gray-300">💎 Has Available Credits</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3 pt-2">
+                                        <button
+                                            onClick={handleApplyFilters}
+                                            disabled={isFiltering}
+                                            className="flex-1 px-6 py-2 bg-gradient-to-r from-teal-500 to-ocean-600 text-white font-semibold rounded-lg hover:from-teal-400 hover:to-ocean-500 transition-all disabled:opacity-50"
+                                        >
+                                            {isFiltering ? 'Applying...' : '🔍 Apply Filters'}
+                                        </button>
+                                        <button
+                                            onClick={handleClearFilters}
+                                            className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-all"
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
+
+                {/* Transaction History Button */}
+                {isAdmin && (
+                    <div className="mb-8 flex gap-4">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={handleLoadTransactions}
+                            disabled={isLoadingTransactions}
+                            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold rounded-lg shadow-lg hover:from-purple-400 hover:to-pink-500 transition-all disabled:opacity-50"
+                        >
+                            {isLoadingTransactions ? 'Loading...' : '📜 View Transaction History'}
+                        </motion.button>
+                        {transactions.length > 0 && (
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleExportTransactions}
+                                className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow-lg hover:from-green-400 hover:to-emerald-500 transition-all"
+                            >
+                                📥 Export to CSV
+                            </motion.button>
+                        )}
+                    </div>
+                )}
+
+                {/* Transaction History Panel */}
+                <AnimatePresence>
+                    {showTransactions && transactions.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="mb-8 bg-blue-deep/40 backdrop-blur-md border border-purple-500/20 rounded-2xl p-6 shadow-xl"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-semibold text-white">Transaction History</h2>
+                                <button
+                                    onClick={() => setShowTransactions(false)}
+                                    className="text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div className="space-y-3 max-h-96 overflow-y-auto">
+                                {transactions.map((tx, idx) => (
+                                    <div key={idx} className="bg-ocean-900/30 border border-ocean-500/20 rounded-lg p-4">
+                                        <div className="flex items-start justify-between mb-2">
+                                            <div className="flex items-center gap-3">
+                                                <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${
+                                                    tx.type === 'register' ? 'bg-blue-500/20 text-blue-300' :
+                                                    tx.type === 'verify' ? 'bg-teal-500/20 text-teal-300' :
+                                                    tx.type === 'reject' ? 'bg-red-500/20 text-red-300' :
+                                                    tx.type === 'issue' ? 'bg-purple-500/20 text-purple-300' :
+                                                    'bg-orange-500/20 text-orange-300'
+                                                }`}>
+                                                    {tx.type.toUpperCase()}
+                                                </span>
+                                                <div>
+                                                    <p className="text-white font-medium">{tx.projectName}</p>
+                                                    <p className="text-xs text-gray-400">Project ID: {tx.projectId}</p>
+                                                </div>
+                                            </div>
+                                            <span className="text-xs text-gray-500">{new Date(tx.timestamp).toLocaleString()}</span>
+                                        </div>
+                                        {tx.amount && (
+                                            <p className="text-sm text-teal-300 mb-1">Amount: {tx.amount} tCO₂e</p>
+                                        )}
+                                        {tx.creditId && (
+                                            <p className="text-sm text-gray-400 mb-1">Credit ID: {tx.creditId}</p>
+                                        )}
+                                        {tx.txHash && (
+                                            <p className="text-xs text-gray-500 font-mono mb-1">TX: {tx.txHash.substring(0, 20)}...{tx.txHash.substring(tx.txHash.length - 10)}</p>
+                                        )}
+                                        {tx.rejectionReason && (
+                                            <p className="text-sm text-red-300 mt-2 p-2 bg-red-500/10 rounded">Reason: {tx.rejectionReason}</p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 {/* Projects Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     <motion.div
@@ -456,61 +815,103 @@ useEffect(() => {
                                     {searchId ? 'No project found with that ID.' : 'No projects found.'} {(isNGO || isAdmin) && !searchId && 'Register one to get started!'}
                                 </div>
                             )}
-                            {filteredProjects.map((project) => (
-                                <div
-                                    key={project.id}
-                                    className="bg-ocean-900/30 border border-ocean-500/20 rounded-lg p-4 hover:border-teal-500/40 transition-all"
-                                >
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <span className="font-mono text-teal-400 font-bold">ID: {project.id}</span>
-                                                <span className={`px-2 py-1 rounded text-xs ${
-                                                    project.verified 
-                                                        ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' 
-                                                        : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
-                                                }`}>
-                                                    {project.verified ? '✓ Verified' : '⏳ Pending'}
-                                                </span>
-                                            </div>
-                                            <h3 className="text-lg font-semibold text-white mb-2">{project.name}</h3>
-                                            
-                                            {/* Project Details */}
-                                            {project.description && (
-                                                <p className="text-sm text-gray-300 mb-2 leading-relaxed">{project.description}</p>
-                                            )}
-                                            <div className="space-y-1 text-xs text-gray-400">
-                                                {project.location && (
-                                                    <div className="flex items-center gap-1">
-                                                        <span>📍</span>
-                                                        <span>Location: {project.location}</span>
-                                                    </div>
-                                                )}
-                                                {project.acres > 0 && (
-                                                    <div className="flex items-center gap-1">
-                                                        <span>🌾</span>
-                                                        <span>Area: {project.acres} acres</span>
-                                                    </div>
-                                                )}
-                                                <div className="flex items-center gap-1">
-                                                    <span>👤</span>
-                                                    <span>Owner: {project.owner.substring(0, 10)}...{project.owner.substring(project.owner.length - 8)}</span>
+                            {filteredProjects.map((project) => {
+                                const statusBadge = getStatusBadge(project.status || 'pending')
+                                return (
+                                    <div
+                                        key={project.id}
+                                        className="bg-ocean-900/30 border border-ocean-500/20 rounded-lg p-4 hover:border-teal-500/40 transition-all"
+                                    >
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                    <span className="font-mono text-teal-400 font-bold">ID: {project.id}</span>
+                                                    
+                                                    {/* Status Badge */}
+                                                    <span className={`px-2 py-1 rounded text-xs ${statusBadge.bg} ${statusBadge.text} border ${statusBadge.border}`}>
+                                                        {statusBadge.icon} {statusBadge.label}
+                                                    </span>
+
+                                                    {/* Legacy Verified Badge */}
+                                                    {project.verified && (
+                                                        <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-300 border border-green-500/30">
+                                                            ⛓️ On-Chain Verified
+                                                        </span>
+                                                    )}
                                                 </div>
+                                                <h3 className="text-lg font-semibold text-white mb-2">{project.name}</h3>
+                                                
+                                                {/* Project Details */}
+                                                {project.description && (
+                                                    <p className="text-sm text-gray-300 mb-2 leading-relaxed">{project.description}</p>
+                                                )}
+                                                <div className="space-y-1 text-xs text-gray-400">
+                                                    {project.location && (
+                                                        <div className="flex items-center gap-1">
+                                                            <span>📍</span>
+                                                            <span>Location: {project.location}</span>
+                                                        </div>
+                                                    )}
+                                                    {project.acres > 0 && (
+                                                        <div className="flex items-center gap-1">
+                                                            <span>🌾</span>
+                                                            <span>Area: {project.acres} acres</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex items-center gap-1">
+                                                        <span>👤</span>
+                                                        <span>Owner: {project.owner.substring(0, 10)}...{project.owner.substring(project.owner.length - 8)}</span>
+                                                    </div>
+                                                    {project.availableCredits !== undefined && BigInt(project.availableCredits) > 0 && (
+                                                        <div className="flex items-center gap-1 text-teal-400 font-semibold">
+                                                            <span>💎</span>
+                                                            <span>Available Credits: {project.availableCredits} tCO₂e</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Rejection Reason */}
+                                                {project.status === 'rejected' && project.rejectionReason && (
+                                                    <div className="mt-3 p-2 bg-red-500/10 border border-red-500/20 rounded text-xs text-red-300">
+                                                        <strong>Rejection Reason:</strong> {project.rejectionReason}
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
-                                        <div className="flex flex-col gap-2">
-                                            {isAdmin && !project.verified && (
-                                                <button
-                                                    onClick={() => handleVerifyProject(project.id)}
-                                                    className="px-3 py-1 bg-teal-500 hover:bg-teal-600 text-white text-sm rounded transition-colors whitespace-nowrap"
-                                                >
-                                                    Verify
-                                                </button>
-                                            )}
+                                            
+                                            {/* Admin Controls */}
+                                            <div className="flex flex-col gap-2 ml-3">
+                                                {isAdmin && (
+                                                    <>
+                                                        {/* Verify Button (for blockchain verification) */}
+                                                        {!project.verified && project.status === 'verified' && (
+                                                            <button
+                                                                onClick={() => handleVerifyProject(project.id)}
+                                                                className="px-3 py-1 bg-teal-500 hover:bg-teal-600 text-white text-xs rounded transition-colors whitespace-nowrap"
+                                                                title="Verify on blockchain"
+                                                            >
+                                                                ⛓️ Verify
+                                                            </button>
+                                                        )}
+                                                        
+                                                        {/* Status Management Button */}
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedProject(project)
+                                                                setNewStatus(project.status || 'pending')
+                                                                setStatusModalOpen(true)
+                                                            }}
+                                                            className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded transition-colors whitespace-nowrap"
+                                                            title="Change project status"
+                                                        >
+                                                            📊 Status
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     </motion.div>
 
@@ -964,6 +1365,99 @@ useEffect(() => {
                                     className="w-full py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-lg shadow-lg hover:from-orange-400 hover:to-red-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isRetiring ? 'Processing...' : 'Confirm Purchase & Retire'}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Status Management Modal (Admin Only) */}
+            <AnimatePresence>
+                {statusModalOpen && selectedProject && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-blue-deep border border-purple-500/30 rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl shadow-purple-500/20 relative"
+                        >
+                            <button
+                                onClick={() => {
+                                    setStatusModalOpen(false)
+                                    setSelectedProject(null)
+                                    setNewStatus('')
+                                    setRejectionReason('')
+                                }}
+                                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+
+                            <h2 className="text-2xl font-bold text-white mb-6">Update Project Status</h2>
+                            
+                            <div className="mb-6 p-4 bg-ocean-900/50 rounded-lg">
+                                <p className="text-sm text-gray-400 mb-1">Project:</p>
+                                <p className="text-white font-semibold">{selectedProject.name}</p>
+                                <p className="text-xs text-gray-500">ID: {selectedProject.id}</p>
+                            </div>
+
+                            {errorMessage && (
+                                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                                    <p className="text-sm text-red-400">{errorMessage}</p>
+                                </div>
+                            )}
+                            
+                            <form onSubmit={handleUpdateStatus}>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">New Status</label>
+                                    <select
+                                        required
+                                        value={newStatus}
+                                        onChange={(e) => setNewStatus(e.target.value)}
+                                        className="w-full px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
+                                    >
+                                        <option value="pending">⏳ Pending</option>
+                                        <option value="under-review">🔍 Under Review</option>
+                                        <option value="verified">✓ Verified</option>
+                                        <option value="rejected">✗ Rejected</option>
+                                    </select>
+                                </div>
+
+                                {newStatus === 'rejected' && (
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">Rejection Reason *</label>
+                                        <textarea
+                                            required
+                                            rows="3"
+                                            value={rejectionReason}
+                                            onChange={(e) => setRejectionReason(e.target.value)}
+                                            className="w-full px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all resize-none"
+                                            placeholder="Explain why this project is being rejected..."
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-6">
+                                    <p className="text-xs text-yellow-300">
+                                        <strong>Note:</strong> Changing status to "Verified" here updates the workflow status. 
+                                        You still need to click "⛓️ Verify" to verify the project on the blockchain.
+                                    </p>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isUpdatingStatus}
+                                    className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold rounded-lg shadow-lg hover:from-purple-400 hover:to-pink-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isUpdatingStatus ? 'Updating...' : 'Update Status'}
                                 </button>
                             </form>
                         </motion.div>

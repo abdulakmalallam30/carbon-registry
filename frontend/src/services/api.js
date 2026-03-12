@@ -111,3 +111,59 @@ export const retireCredit = async (creditId) => {
         return { success: false, error: error.message };
     }
 };
+
+export const updateProjectStatus = async (projectId, status, rejectionReason = '') => {
+    try {
+        const response = await fetch(`${API_URL}/update-project-status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ projectId, status, rejectionReason }),
+        });
+        if (!response.ok) throw new Error('Failed to update project status');
+        return await response.json();
+    } catch (error) {
+        console.error('API Error (updateProjectStatus):', error);
+        return { success: false, error: error.message };
+    }
+};
+
+export const filterProjects = async (filters) => {
+    try {
+        const response = await fetch(`${API_URL}/projects/filter`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(filters),
+        });
+        if (!response.ok) throw new Error('Failed to filter projects');
+        return await response.json();
+    } catch (error) {
+        console.error('API Error (filterProjects):', error);
+        return [];
+    }
+};
+
+export const getTransactions = async () => {
+    try {
+        const response = await fetch(`${API_URL}/transactions`);
+        if (!response.ok) throw new Error('Failed to fetch transactions');
+        return await response.json();
+    } catch (error) {
+        console.error('API Error (getTransactions):', error);
+        return [];
+    }
+};
+
+export const getUserTransactions = async (address) => {
+    try {
+        const response = await fetch(`${API_URL}/transactions/${address}`);
+        if (!response.ok) throw new Error('Failed to fetch user transactions');
+        return await response.json();
+    } catch (error) {
+        console.error('API Error (getUserTransactions):', error);
+        return [];
+    }
+};
