@@ -56,7 +56,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/">
             <motion.div
-              className="flex items-center space-x-3"
+              className="flex items-center space-x-3 bg-gradient-to-br from-cyan-500/15 to-blue-500/10 backdrop-blur-lg border-2 border-cyan-400/30 rounded-xl px-4 py-2 shadow-lg"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -82,7 +82,7 @@ const Navbar = () => {
           </Link>
 
           {/* Navigation Links */}
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-4 bg-gradient-to-br from-cyan-500/15 to-blue-500/10 backdrop-blur-lg border-2 border-cyan-400/30 rounded-xl px-6 py-3 shadow-lg">
             <Link to="/">
               <motion.div
                 className={`relative px-4 py-2 text-sm font-medium transition-colors ${isActive('/')
