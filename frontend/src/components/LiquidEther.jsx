@@ -25,8 +25,10 @@ const LiquidEther = ({
   const rendererRef = useRef(null)
   const sceneRef = useRef(null)
   const cameraRef = useRef(null)
-  const mouseRef = useRef({ x: 0, y: 0 })
+  const mouseRef = useRef({ x: 0.5, y: 0.5 })
   const timeRef = useRef(0)
+  const autoTimeRef = useRef(0)
+  const animationIdRef = useRef(null)
   const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
@@ -38,6 +40,8 @@ const LiquidEther = ({
 
     const width = containerRef.current.clientWidth
     const height = containerRef.current.clientHeight
+
+    if (width === 0 || height === 0) return
 
     // Camera
     const camera = new THREE.OrthographicCamera(
@@ -51,13 +55,23 @@ const LiquidEther = ({
     camera.position.z = 1
     cameraRef.current = camera
 
-    // Renderer
+    // Renderer with proper canvas styling
     const renderer = new THREE.WebGLRenderer({ 
       antialias: true, 
-      alpha: true 
+      alpha: true,
+      powerPreference: 'high-performance'
     })
     renderer.setSize(width, height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2) * resolution)
+    
+    // Apply canvas styles directly
+    renderer.domElement.style.position = 'absolute'
+    renderer.domElement.style.top = '0'
+    renderer.domElement.style.left = '0'
+    renderer.domElement.style.width = '100%'
+    renderer.domElement.style.height = '100%'
+    renderer.domElement.style.pointerEvents = 'none'
+    
     containerRef.current.appendChild(renderer.domElement)
     rendererRef.current = renderer
 
@@ -132,7 +146,7 @@ const LiquidEther = ({
           float mouseDist = length(mouseInfluence);
           float mouseEffect = smoothstep(0.3, 0.0, mouseDist) * intensity;
           
-          // Animated noise
+          // Animated noise with time
           float t = time * 0.2;
           float n1 = snoise(uv * 3.0 + vec2(t * 0.5, t * 0.3)) * 0.5 + 0.5;
           float n2 = snoise(uv * 2.0 - vec2(t * 0.3, t * 0.5)) * 0.5 + 0.5;
@@ -164,9 +178,10 @@ const LiquidEther = ({
 
     // Mouse tracking
     const handleMouseMove = (event) => {
+      if (!containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
-      mouseRef.current.x = (event.clientX - rect.left) / width
-      mouseRef.current.y = 1.0 - (event.clientY - rect.top) / height
+      mouseRef.current.x = (event.clientX - rect.left) / rect.width
+      mouseRef.current.y = 1.0 - (event.clientY - rect.top) / rect.height
     }
 
     const handleMouseEnter = () => {
@@ -183,33 +198,44 @@ const LiquidEther = ({
       containerRef.current.addEventListener('mousemove', handleMouseMove)
     }
 
-    // Animation loop
+    // Animation loop - ALWAYS RUNNING
     const animate = () => {
-      requestAnimationFrame(animate)
+      animationIdRef.current = requestAnimationFrame(animate)
 
-      timeRef.current += 0.01
+      // Update time continuously
+      timeRef.current += 0.016 // ~60fps
 
-      // Animate only when hovered
-      if (isHovered) {
+      // Auto-demo mode: continuous circular motion
+      if (autoDemo && !isHovered) {
+        autoTimeRef.current += 0.01 * autoSpeed
+        material.uniforms.mouse.value.x = 0.5 + Math.sin(autoTimeRef.current) * 0.25
+        material.uniforms.mouse.value.y = 0.5 + Math.cos(autoTimeRef.current * 0.7) * 0.25
+        material.uniforms.intensity.value = autoIntensity * 0.8
+      } else if (isHovered) {
+        // Use real mouse position when hovering
         material.uniforms.mouse.value.x = mouseRef.current.x
         material.uniforms.mouse.value.y = mouseRef.current.y
         material.uniforms.intensity.value = autoIntensity
-      } else {
-        // Fade out when not hovering
-        material.uniforms.intensity.value *= 0.95
       }
 
+      // Update time uniform (this drives the noise animation)
       material.uniforms.time.value = timeRef.current
 
+      // Render the scene
       renderer.render(scene, camera)
     }
 
+    // Start animation immediately
     animate()
 
     // Handle resize
     const handleResize = () => {
+      if (!containerRef.current) return
+      
       const newWidth = containerRef.current.clientWidth
       const newHeight = containerRef.current.clientHeight
+
+      if (newWidth === 0 || newHeight === 0) return
 
       camera.left = newWidth / -2
       camera.right = newWidth / 2
@@ -228,20 +254,23 @@ const LiquidEther = ({
 
     // Cleanup
     return () => {
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current)
+      }
       window.removeEventListener('resize', handleResize)
       if (containerRef.current) {
         containerRef.current.removeEventListener('mouseenter', handleMouseEnter)
         containerRef.current.removeEventListener('mouseleave', handleMouseLeave)
         containerRef.current.removeEventListener('mousemove', handleMouseMove)
       }
-      if (containerRef.current && renderer.domElement) {
+      if (containerRef.current && renderer.domElement && containerRef.current.contains(renderer.domElement)) {
         containerRef.current.removeChild(renderer.domElement)
       }
       geometry.dispose()
       material.dispose()
       renderer.dispose()
     }
-  }, [colors, mouseForce, cursorSize, isViscous, viscous, resolution, autoDemo, autoSpeed, autoIntensity, color0, color1, color2, isHovered])
+  }, [color0, color1, color2, autoDemo, autoSpeed, autoIntensity, viscous, resolution, isHovered])
 
   return (
     <div 
@@ -253,7 +282,8 @@ const LiquidEther = ({
         top: 0,
         left: 0,
         zIndex: 0,
-        opacity: isHovered ? 1 : 0.3,
+        pointerEvents: 'auto',
+        opacity: isHovered ? 1 : 0.7,
         transition: 'opacity 0.5s ease-in-out'
       }}
     />
