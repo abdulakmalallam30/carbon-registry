@@ -27,9 +27,9 @@ const LiquidEther = ({
   const cameraRef = useRef(null)
   const mouseRef = useRef({ x: 0.5, y: 0.5 })
   const timeRef = useRef(0)
-  const autoTimeRef = useRef(0)
   const animationIdRef = useRef(null)
-  const [isHovered, setIsHovered] = useState(false)
+  const mouseMoveTimeoutRef = useRef(null)
+  const [isMouseMoving, setIsMouseMoving] = useState(false)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -176,52 +176,62 @@ const LiquidEther = ({
     const mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
 
-    // Mouse tracking
+    // Mouse tracking with movement detection
     const handleMouseMove = (event) => {
       if (!containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
       mouseRef.current.x = (event.clientX - rect.left) / rect.width
       mouseRef.current.y = 1.0 - (event.clientY - rect.top) / rect.height
-    }
-
-    const handleMouseEnter = () => {
-      setIsHovered(true)
+      
+      // Set mouse as moving
+      setIsMouseMoving(true)
+      
+      // Clear existing timeout
+      if (mouseMoveTimeoutRef.current) {
+        clearTimeout(mouseMoveTimeoutRef.current)
+      }
+      
+      // Set timeout to detect when mouse stops (300ms of no movement)
+      mouseMoveTimeoutRef.current = setTimeout(() => {
+        setIsMouseMoving(false)
+      }, 300)
     }
 
     const handleMouseLeave = () => {
-      setIsHovered(false)
+      setIsMouseMoving(false)
+      if (mouseMoveTimeoutRef.current) {
+        clearTimeout(mouseMoveTimeoutRef.current)
+      }
     }
 
     if (containerRef.current) {
-      containerRef.current.addEventListener('mouseenter', handleMouseEnter)
       containerRef.current.addEventListener('mouseleave', handleMouseLeave)
       containerRef.current.addEventListener('mousemove', handleMouseMove)
     }
 
-    // Animation loop - ALWAYS RUNNING
+    // Animation loop - only animates when mouse is moving
     const animate = () => {
       animationIdRef.current = requestAnimationFrame(animate)
 
-      // Update time continuously
-      timeRef.current += 0.016 // ~60fps
-
-      // Auto-demo mode: continuous circular motion
-      if (autoDemo && !isHovered) {
-        autoTimeRef.current += 0.01 * autoSpeed
-        material.uniforms.mouse.value.x = 0.5 + Math.sin(autoTimeRef.current) * 0.25
-        material.uniforms.mouse.value.y = 0.5 + Math.cos(autoTimeRef.current * 0.7) * 0.25
-        material.uniforms.intensity.value = autoIntensity * 0.8
-      } else if (isHovered) {
-        // Use real mouse position when hovering
+      // Only update time and animate when mouse is moving
+      if (isMouseMoving) {
+        timeRef.current += 0.016 // ~60fps
+        
+        // Use real mouse position
         material.uniforms.mouse.value.x = mouseRef.current.x
         material.uniforms.mouse.value.y = mouseRef.current.y
         material.uniforms.intensity.value = autoIntensity
+        
+        // Update time uniform (this drives the noise animation)
+        material.uniforms.time.value = timeRef.current
+      } else {
+        // Fade out intensity when not moving
+        if (material.uniforms.intensity.value > 0.1) {
+          material.uniforms.intensity.value *= 0.9
+        }
       }
 
-      // Update time uniform (this drives the noise animation)
-      material.uniforms.time.value = timeRef.current
-
-      // Render the scene
+      // Always render to show fade out effect
       renderer.render(scene, camera)
     }
 
@@ -257,9 +267,11 @@ const LiquidEther = ({
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current)
       }
+      if (mouseMoveTimeoutRef.current) {
+        clearTimeout(mouseMoveTimeoutRef.current)
+      }
       window.removeEventListener('resize', handleResize)
       if (containerRef.current) {
-        containerRef.current.removeEventListener('mouseenter', handleMouseEnter)
         containerRef.current.removeEventListener('mouseleave', handleMouseLeave)
         containerRef.current.removeEventListener('mousemove', handleMouseMove)
       }
@@ -270,7 +282,7 @@ const LiquidEther = ({
       material.dispose()
       renderer.dispose()
     }
-  }, [color0, color1, color2, autoDemo, autoSpeed, autoIntensity, viscous, resolution, isHovered])
+  }, [color0, color1, color2, autoDemo, autoSpeed, autoIntensity, viscous, resolution, isMouseMoving])
 
   return (
     <div 
@@ -283,8 +295,8 @@ const LiquidEther = ({
         left: 0,
         zIndex: 0,
         pointerEvents: 'auto',
-        opacity: isHovered ? 1 : 0.7,
-        transition: 'opacity 0.5s ease-in-out'
+        opacity: isMouseMoving ? 1 : 0.2,
+        transition: 'opacity 0.3s ease-in-out'
       }}
     />
   )
