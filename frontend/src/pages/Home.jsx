@@ -82,7 +82,7 @@ const Home = () => {
         >
           <motion.h1
             className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent drop-shadow-2xl"
-            style={{ fontFamily: '"Poppins", "Inter", sans-serif', letterSpacing: '-0.02em' }}
+            style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.02em' }}
             variants={itemVariants}
           >
             Blue Carbon Registry
@@ -90,7 +90,7 @@ const Home = () => {
 
           <motion.p
             className="text-xl sm:text-2xl text-white mb-4 font-medium drop-shadow-lg"
-            style={{ fontFamily: '"Inter", sans-serif' }}
+            style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
             variants={itemVariants}
           >
             A transparent digital system to register, monitor, and verify blue carbon ecosystem projects.
@@ -98,7 +98,7 @@ const Home = () => {
 
           <motion.p
             className="text-lg text-cyan-300 mb-12 font-semibold drop-shadow-md"
-            style={{ fontFamily: '"Inter", sans-serif' }}
+            style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
             variants={itemVariants}
           >
             Protecting coastal ecosystems through technology and transparency.
@@ -110,7 +110,7 @@ const Home = () => {
           >
             <motion.button
               className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-600 text-white font-bold rounded-xl shadow-xl shadow-cyan-500/30 hover:shadow-cyan-500/60 transition-all"
-              style={{ fontFamily: '"Inter", sans-serif' }}
+              style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -120,7 +120,7 @@ const Home = () => {
             <Link to="/about">
               <motion.button
                 className="px-8 py-4 border-2 border-cyan-400 text-white font-bold rounded-xl hover:bg-cyan-500/20 hover:border-cyan-300 transition-all backdrop-blur-sm"
-                style={{ fontFamily: '"Inter", sans-serif' }}
+                style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -140,12 +140,12 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               What is Blue Carbon?
             </h2>
             
             <div className="bg-gradient-to-br from-teal-500/5 to-ocean-500/5 backdrop-blur-sm border border-teal-500/20 rounded-2xl p-8 sm:p-12">
-              <p className="text-lg text-white leading-relaxed text-center max-w-4xl mx-auto drop-shadow-md" style={{ fontFamily: '"Inter", sans-serif' }}>
+              <p className="text-lg text-white leading-relaxed text-center max-w-4xl mx-auto drop-shadow-md" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                 Blue carbon refers to carbon captured by ocean and coastal ecosystems, particularly 
                 <span className="text-cyan-300 font-bold"> mangroves</span>, 
                 <span className="text-cyan-300 font-bold"> seagrasses</span>, and 
@@ -161,7 +161,7 @@ const Home = () => {
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="text-5xl font-extrabold text-cyan-300 mb-2 drop-shadow-lg" style={{ fontFamily: '"Poppins", sans-serif' }}>5-10×</div>
+                  <div className="text-5xl font-extrabold text-cyan-300 mb-2 drop-shadow-lg" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>5-10×</div>
                   <div className="text-gray-100 text-sm font-medium">More carbon storage than terrestrial forests</div>
                 </motion.div>
 
@@ -170,7 +170,7 @@ const Home = () => {
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="text-5xl font-extrabold text-cyan-300 mb-2 drop-shadow-lg" style={{ fontFamily: '"Poppins", sans-serif' }}>50%</div>
+                  <div className="text-5xl font-extrabold text-cyan-300 mb-2 drop-shadow-lg" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>50%</div>
                   <div className="text-gray-100 text-sm font-medium">Of ocean carbon buried in sediments</div>
                 </motion.div>
 
@@ -179,7 +179,7 @@ const Home = () => {
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="text-5xl font-extrabold text-cyan-300 mb-2 drop-shadow-lg" style={{ fontFamily: '"Poppins", sans-serif' }}>1000s</div>
+                  <div className="text-5xl font-extrabold text-cyan-300 mb-2 drop-shadow-lg" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>1000s</div>
                   <div className="text-gray-100 text-sm font-medium">Years of carbon storage capacity</div>
                 </motion.div>
               </div>
@@ -197,11 +197,11 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               Why a Registry?
             </h2>
 
-            <p className="text-lg text-white text-center mb-12 max-w-3xl mx-auto font-medium drop-shadow-md" style={{ fontFamily: '"Inter", sans-serif' }}>
+            <p className="text-lg text-white text-center mb-12 max-w-3xl mx-auto font-medium drop-shadow-md" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               The Blue Carbon Registry ensures integrity and trust in carbon credit markets through:
             </p>
 
@@ -220,8 +220,8 @@ const Home = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-extrabold text-white mb-4 drop-shadow-lg" style={{ fontFamily: '"Poppins", sans-serif' }}>Transparency</h3>
-                  <p className="text-gray-100 leading-relaxed font-medium" style={{ fontFamily: '"Inter", sans-serif' }}>
+                  <h3 className="text-2xl font-extrabold text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Transparency</h3>
+                  <p className="text-gray-100 leading-relaxed font-medium" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                     All project data, verification processes, and carbon credit transactions are recorded 
                     and accessible, ensuring complete transparency for stakeholders and investors.
                   </p>
@@ -242,8 +242,8 @@ const Home = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-extrabold text-white mb-4 drop-shadow-lg" style={{ fontFamily: '"Poppins", sans-serif' }}>Traceability</h3>
-                  <p className="text-gray-100 leading-relaxed font-medium" style={{ fontFamily: '"Inter", sans-serif' }}>
+                  <h3 className="text-2xl font-extrabold text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Traceability</h3>
+                  <p className="text-gray-100 leading-relaxed font-medium" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                     Track carbon credits from creation to retirement, maintaining a complete audit trail 
                     that prevents double-counting and fraudulent claims.
                   </p>
@@ -264,8 +264,8 @@ const Home = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-extrabold text-white mb-4 drop-shadow-lg" style={{ fontFamily: '"Poppins", sans-serif' }}>Verification</h3>
-                  <p className="text-gray-100 leading-relaxed font-medium" style={{ fontFamily: '"Inter", sans-serif' }}>
+                  <h3 className="text-2xl font-extrabold text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Verification</h3>
+                  <p className="text-gray-100 leading-relaxed font-medium" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                     Rigorous verification processes ensure that carbon credits represent real, measurable, 
                     and additional carbon sequestration from blue carbon ecosystems.
                   </p>
@@ -285,11 +285,11 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-cyan-300 via-teal-300 to-emerald-300 bg-clip-text text-transparent drop-shadow-xl" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               Key Features
             </h2>
 
-            <p className="text-lg text-white text-center mb-12 max-w-3xl mx-auto font-medium drop-shadow-md" style={{ fontFamily: '"Inter", sans-serif' }}>
+            <p className="text-lg text-white text-center mb-12 max-w-3xl mx-auto font-medium drop-shadow-md" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
               Our platform provides comprehensive tools for managing blue carbon projects
             </p>
 
@@ -313,11 +313,11 @@ const Home = () => {
                       {feature.icon}
                     </motion.div>
                     
-                    <h3 className="text-2xl font-extrabold text-white mb-4 drop-shadow-lg" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                    <h3 className="text-2xl font-extrabold text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                       {feature.title}
                     </h3>
                     
-                    <p className="text-gray-100 leading-relaxed font-medium" style={{ fontFamily: '"Inter", sans-serif' }}>
+                    <p className="text-gray-100 leading-relaxed font-medium" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
                       {feature.description}
                     </p>
                   </div>
