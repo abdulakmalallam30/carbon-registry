@@ -81,11 +81,11 @@ const Home = () => {
           variants={containerVariants}
         >
           <motion.h1
-            className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent drop-shadow-2xl"
+            className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent drop-shadow-2xl uppercase"
             style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900', letterSpacing: '0.02em', WebkitTextStroke: '1px rgba(255,255,255,0.1)' }}
             variants={itemVariants}
           >
-            Blue Carbon Registry
+            BLUE CARBON REGISTRY
           </motion.h1>
 
           <motion.p
