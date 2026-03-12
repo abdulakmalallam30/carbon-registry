@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getProjects, getCredits, issueCredit, getAccounts, verifyProject, registerProject, retireCredit, searchProjectById, filterProjects, updateProjectStatus, getTransactions } from '../services/api'
 import { useAuth } from '../context/AuthContext'
+import ImpactStatistics from '../components/ImpactStatistics'
 
 const Dashboard = () => {
     const { currentUser, userRole, isNGO, isIndustry, isAdmin } = useAuth()
@@ -64,6 +65,9 @@ const Dashboard = () => {
     const [transactions, setTransactions] = useState([])
     const [showTransactions, setShowTransactions] = useState(false)
     const [isLoadingTransactions, setIsLoadingTransactions] = useState(false)
+
+    // Statistics View
+    const [showStatistics, setShowStatistics] = useState(false)
 
     const [errorMessage, setErrorMessage] = useState('')
     const [successMessage, setSuccessMessage] = useState('')
@@ -530,6 +534,27 @@ useEffect(() => {
                             🛒 Purchase Credits
                         </motion.button>
                     )}
+                    
+                    {/* View Statistics Button - All Roles */}
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowStatistics(!showStatistics)}
+                        className={`px-6 py-3 ${showStatistics ? 'bg-gradient-to-r from-green-600 to-emerald-700' : 'bg-gradient-to-r from-green-500 to-emerald-600'} text-white font-semibold rounded-lg shadow-lg hover:from-green-400 hover:to-emerald-500 transition-all`}
+                    >
+                        {showStatistics ? '📊 Hide Statistics' : '📊 View Impact Statistics'}
+                    </motion.button>
+
+                    {/* Transaction History Button */}
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleLoadTransactions}
+                        disabled={isLoadingTransactions}
+                        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-400 hover:to-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isLoadingTransactions ? '⏳ Loading...' : '📜 Transaction History'}
+                    </motion.button>
                 </div>
 
                 {/* Advanced Filters Panel */}
@@ -702,6 +727,38 @@ useEffect(() => {
                         )}
                     </div>
                 )}
+
+                {/* Impact Statistics Panel */}
+                <AnimatePresence>
+                    {showStatistics && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="mb-8"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                                    <span>📊</span>
+                                    {isAdmin ? 'Platform Impact Statistics' : isNGO ? 'Your Project Impact' : 'Your Carbon Offset Impact'}
+                                </h2>
+                                <button
+                                    onClick={() => setShowStatistics(false)}
+                                    className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <ImpactStatistics 
+                                projects={filteredProjects} 
+                                transactions={transactions}
+                                userRole={userRole}
+                            />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 {/* Transaction History Panel */}
                 <AnimatePresence>
