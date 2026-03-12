@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import LiquidEther from '../components/LiquidEther'
 
 const Home = () => {
   const containerVariants = {
@@ -53,7 +54,33 @@ const Home = () => {
   ]
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* Liquid Ether Background */}
+      <div className="fixed top-0 left-0 w-full h-full -z-10">
+        <LiquidEther
+          colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+          mouseForce={20}
+          cursorSize={100}
+          isViscous={true}
+          viscous={30}
+          iterationsViscous={32}
+          iterationsPoisson={32}
+          resolution={0.5}
+          isBounce={false}
+          autoDemo={true}
+          autoSpeed={0.5}
+          autoIntensity={2.2}
+          takeoverDuration={0.25}
+          autoResumeDelay={3000}
+          autoRampDuration={0.6}
+          color0="#5227FF"
+          color1="#FF9FFC"
+          color2="#B19EEF"
+        />
+      </div>
+      
+      {/* Content */}
+      <div className="relative z-10">
       {/* Hero Section */}
       <section className="min-h-screen flex items-center justify-center px-6 sm:px-8 lg:px-12">
         <motion.div
@@ -304,6 +331,7 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
+      </div>
     </div>
   )
 }
