@@ -59,8 +59,8 @@ const Home = () => {
       <div className="fixed top-0 left-0 w-full h-full -z-10">
         <LiquidEther
           colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-          mouseForce={0}
-          cursorSize={0}
+          mouseForce={20}
+          cursorSize={100}
           resolution={0.5}
           dt={0.014}
           BFECC={true}
@@ -69,9 +69,9 @@ const Home = () => {
           iterationsViscous={32}
           iterationsPoisson={32}
           isBounce={false}
-          autoDemo={true}
+          autoDemo={false}
           autoSpeed={0.3}
-          autoIntensity={1.8}
+          autoIntensity={2.2}
           takeoverDuration={0}
           autoResumeDelay={0}
           autoRampDuration={0}

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 
 const LiquidEther = ({
@@ -27,6 +27,7 @@ const LiquidEther = ({
   const cameraRef = useRef(null)
   const mouseRef = useRef({ x: 0, y: 0 })
   const timeRef = useRef(0)
+  const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -161,8 +162,26 @@ const LiquidEther = ({
     const mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
 
-    // Auto demo animation only - no mouse interaction
-    let autoTime = 0
+    // Mouse tracking
+    const handleMouseMove = (event) => {
+      const rect = containerRef.current.getBoundingClientRect()
+      mouseRef.current.x = (event.clientX - rect.left) / width
+      mouseRef.current.y = 1.0 - (event.clientY - rect.top) / height
+    }
+
+    const handleMouseEnter = () => {
+      setIsHovered(true)
+    }
+
+    const handleMouseLeave = () => {
+      setIsHovered(false)
+    }
+
+    if (containerRef.current) {
+      containerRef.current.addEventListener('mouseenter', handleMouseEnter)
+      containerRef.current.addEventListener('mouseleave', handleMouseLeave)
+      containerRef.current.addEventListener('mousemove', handleMouseMove)
+    }
 
     // Animation loop
     const animate = () => {
@@ -170,10 +189,15 @@ const LiquidEther = ({
 
       timeRef.current += 0.01
 
-      // Always use auto demo - ignore mouse
-      autoTime += 0.01 * autoSpeed
-      material.uniforms.mouse.value.x = 0.5 + Math.sin(autoTime) * 0.2
-      material.uniforms.mouse.value.y = 0.5 + Math.cos(autoTime * 0.7) * 0.2
+      // Animate only when hovered
+      if (isHovered) {
+        material.uniforms.mouse.value.x = mouseRef.current.x
+        material.uniforms.mouse.value.y = mouseRef.current.y
+        material.uniforms.intensity.value = autoIntensity
+      } else {
+        // Fade out when not hovering
+        material.uniforms.intensity.value *= 0.95
+      }
 
       material.uniforms.time.value = timeRef.current
 
@@ -205,6 +229,11 @@ const LiquidEther = ({
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize)
+      if (containerRef.current) {
+        containerRef.current.removeEventListener('mouseenter', handleMouseEnter)
+        containerRef.current.removeEventListener('mouseleave', handleMouseLeave)
+        containerRef.current.removeEventListener('mousemove', handleMouseMove)
+      }
       if (containerRef.current && renderer.domElement) {
         containerRef.current.removeChild(renderer.domElement)
       }
@@ -212,7 +241,7 @@ const LiquidEther = ({
       material.dispose()
       renderer.dispose()
     }
-  }, [colors, mouseForce, cursorSize, isViscous, viscous, resolution, autoDemo, autoSpeed, autoIntensity, color0, color1, color2])
+  }, [colors, mouseForce, cursorSize, isViscous, viscous, resolution, autoDemo, autoSpeed, autoIntensity, color0, color1, color2, isHovered])
 
   return (
     <div 
@@ -223,7 +252,9 @@ const LiquidEther = ({
         position: 'absolute',
         top: 0,
         left: 0,
-        zIndex: 0
+        zIndex: 0,
+        opacity: isHovered ? 1 : 0.3,
+        transition: 'opacity 0.5s ease-in-out'
       }}
     />
   )
