@@ -81,12 +81,19 @@ const Home = () => {
           variants={containerVariants}
         >
           <motion.h1
-            className="text-4xl sm:text-6xl lg:text-7xl font-black mb-8 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent drop-shadow-2xl uppercase whitespace-nowrap"
+            className="text-4xl sm:text-6xl lg:text-7xl font-black mb-4 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 bg-clip-text text-transparent drop-shadow-2xl uppercase whitespace-nowrap"
             style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900', letterSpacing: '0.02em', WebkitTextStroke: '1px rgba(255,255,255,0.1)' }}
             variants={itemVariants}
           >
             BLUE CARBON REGISTRY
           </motion.h1>
+
+          <motion.p
+            className="text-lg sm:text-xl text-cyan-300 mb-8 font-bold drop-shadow-lg italic"
+            variants={itemVariants}
+          >
+            🌊 Protecting Our Oceans, One Credit at a Time
+          </motion.p>
 
           <motion.p
             className="text-xl sm:text-2xl text-white mb-8 font-black drop-shadow-lg"
@@ -97,7 +104,7 @@ const Home = () => {
           </motion.p>
 
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8 max-w-4xl mx-auto"
             variants={itemVariants}
           >
             <motion.div
@@ -105,13 +112,20 @@ const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              whileHover={{ scale: 1.05, y: -5 }}
+              whileHover={{ scale: 1.05, y: -5, borderColor: 'rgba(34, 211, 238, 0.5)' }}
             >
-              <div className="text-4xl mb-3">📝</div>
-              <h3 className="text-2xl font-black text-white drop-shadow-lg" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}>
+              <motion.div 
+                className="text-4xl mb-3"
+                animate={{ rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+              >
+                📝
+              </motion.div>
+              <h3 className="text-2xl font-black text-white drop-shadow-lg mb-2" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}>
                 REGISTER
               </h3>
-              <p className="text-sm text-cyan-300 mt-2 font-bold">Blue Carbon Ecosystem</p>
+              <p className="text-sm text-cyan-300 font-bold">Blue Carbon Projects</p>
+              <p className="text-xs text-cyan-200 mt-2 opacity-80">Tokenize & Track</p>
             </motion.div>
 
             <motion.div
@@ -119,13 +133,20 @@ const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              whileHover={{ scale: 1.05, y: -5 }}
+              whileHover={{ scale: 1.05, y: -5, borderColor: 'rgba(56, 189, 248, 0.5)' }}
             >
-              <div className="text-4xl mb-3">📊</div>
-              <h3 className="text-2xl font-black text-white drop-shadow-lg" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}>
+              <motion.div 
+                className="text-4xl mb-3"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+              >
+                📊
+              </motion.div>
+              <h3 className="text-2xl font-black text-white drop-shadow-lg mb-2" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}>
                 MONITOR
               </h3>
-              <p className="text-sm text-sky-300 mt-2 font-bold">Blue Carbon Ecosystem</p>
+              <p className="text-sm text-sky-300 font-bold">Real-Time Data</p>
+              <p className="text-xs text-sky-200 mt-2 opacity-80">Live Analytics</p>
             </motion.div>
 
             <motion.div
@@ -133,13 +154,86 @@ const Home = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
-              whileHover={{ scale: 1.05, y: -5 }}
+              whileHover={{ scale: 1.05, y: -5, borderColor: 'rgba(59, 130, 246, 0.5)' }}
             >
-              <div className="text-4xl mb-3">✅</div>
-              <h3 className="text-2xl font-black text-white drop-shadow-lg" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}>
+              <motion.div 
+                className="text-4xl mb-3"
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+              >
+                ✅
+              </motion.div>
+              <h3 className="text-2xl font-black text-white drop-shadow-lg mb-2" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}>
                 VERIFY
               </h3>
-              <p className="text-sm text-blue-300 mt-2 font-bold">Blue Carbon Ecosystem</p>
+              <p className="text-sm text-blue-300 font-bold">Certified Credits</p>
+              <p className="text-xs text-blue-200 mt-2 opacity-80">Blockchain Secured</p>
+            </motion.div>
+          </motion.div>
+
+          {/* Live Stats Counter */}
+          <motion.div
+            className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto mb-12"
+            variants={itemVariants}
+          >
+            <motion.div 
+              className="bg-gradient-to-br from-cyan-500/10 to-transparent backdrop-blur-sm border border-cyan-500/20 rounded-xl p-4 text-center"
+              whileHover={{ scale: 1.05 }}
+            >
+              <motion.div 
+                className="text-3xl font-black text-cyan-400 mb-1"
+                style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                247+
+              </motion.div>
+              <div className="text-xs text-gray-300 font-bold uppercase">Projects</div>
+            </motion.div>
+
+            <motion.div 
+              className="bg-gradient-to-br from-sky-500/10 to-transparent backdrop-blur-sm border border-sky-500/20 rounded-xl p-4 text-center"
+              whileHover={{ scale: 1.05 }}
+            >
+              <motion.div 
+                className="text-3xl font-black text-sky-400 mb-1"
+                style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
+              >
+                1.2M
+              </motion.div>
+              <div className="text-xs text-gray-300 font-bold uppercase">Tons CO₂</div>
+            </motion.div>
+
+            <motion.div 
+              className="bg-gradient-to-br from-blue-500/10 to-transparent backdrop-blur-sm border border-blue-500/20 rounded-xl p-4 text-center"
+              whileHover={{ scale: 1.05 }}
+            >
+              <motion.div 
+                className="text-3xl font-black text-blue-400 mb-1"
+                style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
+              >
+                89
+              </motion.div>
+              <div className="text-xs text-gray-300 font-bold uppercase">Countries</div>
+            </motion.div>
+
+            <motion.div 
+              className="bg-gradient-to-br from-indigo-500/10 to-transparent backdrop-blur-sm border border-indigo-500/20 rounded-xl p-4 text-center"
+              whileHover={{ scale: 1.05 }}
+            >
+              <motion.div 
+                className="text-3xl font-black text-indigo-400 mb-1"
+                style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity, delay: 0.9 }}
+              >
+                24/7
+              </motion.div>
+              <div className="text-xs text-gray-300 font-bold uppercase">Monitoring</div>
             </motion.div>
           </motion.div>
 
