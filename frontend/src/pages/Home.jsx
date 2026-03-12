@@ -67,7 +67,7 @@ const Home = () => {
           <source src={introVideo} type="video/mp4" />
         </video>
         {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/80 to-black/90"></div>
       </div>
       
       {/* Content */}
