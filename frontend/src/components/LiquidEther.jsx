@@ -29,7 +29,8 @@ const LiquidEther = ({
   const timeRef = useRef(0)
   const animationIdRef = useRef(null)
   const mouseMoveTimeoutRef = useRef(null)
-  const [isMouseMoving, setIsMouseMoving] = useState(false)
+  const isMouseMovingRef = useRef(false)
+  const [opacity, setOpacity] = useState(0.2)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -184,7 +185,8 @@ const LiquidEther = ({
       mouseRef.current.y = 1.0 - (event.clientY - rect.top) / rect.height
       
       // Set mouse as moving
-      setIsMouseMoving(true)
+      isMouseMovingRef.current = true
+      setOpacity(1)
       
       // Clear existing timeout
       if (mouseMoveTimeoutRef.current) {
@@ -193,12 +195,14 @@ const LiquidEther = ({
       
       // Set timeout to detect when mouse stops (300ms of no movement)
       mouseMoveTimeoutRef.current = setTimeout(() => {
-        setIsMouseMoving(false)
+        isMouseMovingRef.current = false
+        setOpacity(0.2)
       }, 300)
     }
 
     const handleMouseLeave = () => {
-      setIsMouseMoving(false)
+      isMouseMovingRef.current = false
+      setOpacity(0.2)
       if (mouseMoveTimeoutRef.current) {
         clearTimeout(mouseMoveTimeoutRef.current)
       }
@@ -214,7 +218,7 @@ const LiquidEther = ({
       animationIdRef.current = requestAnimationFrame(animate)
 
       // Only update time and animate when mouse is moving
-      if (isMouseMoving) {
+      if (isMouseMovingRef.current) {
         timeRef.current += 0.016 // ~60fps
         
         // Use real mouse position
@@ -282,7 +286,7 @@ const LiquidEther = ({
       material.dispose()
       renderer.dispose()
     }
-  }, [color0, color1, color2, autoDemo, autoSpeed, autoIntensity, viscous, resolution, isMouseMoving])
+  }, [color0, color1, color2, autoDemo, autoSpeed, autoIntensity, viscous, resolution])
 
   return (
     <div 
@@ -295,7 +299,7 @@ const LiquidEther = ({
         left: 0,
         zIndex: 0,
         pointerEvents: 'auto',
-        opacity: isMouseMoving ? 1 : 0.2,
+        opacity: opacity,
         transition: 'opacity 0.3s ease-in-out'
       }}
     />
