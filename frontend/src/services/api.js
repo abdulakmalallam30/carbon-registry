@@ -167,3 +167,25 @@ export const getUserTransactions = async (address) => {
         return [];
     }
 };
+
+export const chatWithAssistant = async (message, context = {}) => {
+    try {
+        const response = await fetch(`${API_URL}/chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message, context }),
+        });
+
+        if (!response.ok) throw new Error('Failed to get assistant response');
+        return await response.json();
+    } catch (error) {
+        console.error('API Error (chatWithAssistant):', error);
+        return {
+            success: false,
+            reply: 'Assistant is unavailable right now. Please try again in a moment.',
+            source: 'error'
+        };
+    }
+};

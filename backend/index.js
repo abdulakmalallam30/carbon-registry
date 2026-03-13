@@ -38,6 +38,110 @@ const PROJECT_STATUS = {
   REJECTED: 'rejected'
 };
 
+const FAQ_ENTRIES = [
+  {
+    keywords: ['register', 'project', 'ngo'],
+    answer: 'NGO and Admin users can register projects from Dashboard > Register New Project. NGOs/Admin can track GPS and use the Use GPS button in the form before submitting.'
+  },
+  {
+    keywords: ['location', 'track', 'gps'],
+    answer: 'Location tracking is enabled for NGO and Admin roles. Industry users can view saved project locations, including clickable map coordinates if available.'
+  },
+  {
+    keywords: ['carbon', 'prediction', 'formula', 'acres', 'plant'],
+    answer: 'Carbon prediction uses a per-acre-per-year sequestration rate based on selected ecosystem type. Estimated storage is projected for 1, 5, 10, 25, and 50 years.'
+  },
+  {
+    keywords: ['issue', 'credit', 'admin'],
+    answer: 'Only Admin can issue credits for verified projects. Use Dashboard > Issue Credits and enter project ID, amount, and recipient account.'
+  },
+  {
+    keywords: ['industry', 'buy', 'retire', 'purchase'],
+    answer: 'Industry users can search projects, view locations, and purchase/retire available credits from the Dashboard.'
+  },
+  {
+    keywords: ['verify', 'rejected', 'status'],
+    answer: 'Admin can manage project status as pending, under-review, verified, or rejected. Rejection can include a reason visible in project details.'
+  }
+];
+
+function getFaqReply(message) {
+  const text = String(message || '').toLowerCase();
+  if (!text.trim()) return null;
+
+  let best = null;
+  let bestScore = 0;
+
+  for (const entry of FAQ_ENTRIES) {
+    let score = 0;
+    for (const kw of entry.keywords) {
+      if (text.includes(kw)) score += 1;
+    }
+    if (score > bestScore) {
+      best = entry;
+      bestScore = score;
+    }
+  }
+
+  return bestScore >= 2 ? best.answer : null;
+}
+
+async function getAiReply(message, role) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+
+  if (!apiKey) {
+    return {
+      available: false,
+      text: 'AI fallback is not configured yet. Set OPENAI_API_KEY in backend/.env to enable dynamic answers.'
+    };
+  }
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.3,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a concise assistant for a Blue Carbon Registry dApp. Give practical role-aware steps for admin, ngo, and industry flows.'
+          },
+          {
+            role: 'user',
+            content: `User role: ${role || 'guest'}\nQuestion: ${message}`
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      return {
+        available: false,
+        text: `AI fallback request failed: ${errText}`
+      };
+    }
+
+    const data = await response.json();
+    const text = data?.choices?.[0]?.message?.content?.trim();
+    return {
+      available: true,
+      text: text || 'No AI response received.'
+    };
+  } catch (error) {
+    return {
+      available: false,
+      text: `AI fallback error: ${error.message}`
+    };
+  }
+}
+
 // Routes
 app.get("/", (req, res) => {
   res.send("Backend running");
@@ -504,6 +608,32 @@ app.get("/transactions/:address", async (req, res) => {
     res.json(userTransactions.slice().reverse());
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Hybrid assistant endpoint (FAQ first, AI fallback)
+app.post('/chat', async (req, res) => {
+  try {
+    const { message, context } = req.body || {};
+    const role = context?.role || 'guest';
+
+    if (!message || !String(message).trim()) {
+      return res.status(400).json({ success: false, reply: 'Message is required.' });
+    }
+
+    const faqReply = getFaqReply(message);
+    if (faqReply) {
+      return res.json({ success: true, source: 'faq', reply: faqReply });
+    }
+
+    const ai = await getAiReply(message, role);
+    return res.json({
+      success: true,
+      source: ai.available ? 'ai' : 'fallback',
+      reply: ai.text
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, reply: `Assistant error: ${error.message}` });
   }
 });
 

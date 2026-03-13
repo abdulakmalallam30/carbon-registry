@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
+import ChatBot from './components/ChatBot'
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
+          <ChatBot />
         </div>
       </AuthProvider>
     </Router>
