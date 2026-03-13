@@ -69,7 +69,7 @@ const Dashboard = () => {
     // Statistics View
     const [showStatistics, setShowStatistics] = useState(false)
 
-    // Location Tracking (Admin & Industry)
+    // Location Tracking (Admin, Industry & NGO)
     const [userLocation, setUserLocation] = useState(null)
     const [locationError, setLocationError] = useState('')
     const [isLoadingLocation, setIsLoadingLocation] = useState(false)
@@ -81,11 +81,11 @@ const Dashboard = () => {
     useEffect(() => {
         fetchDashboardData()
         fetchAccounts()
-        // Auto-fetch location for Admin and Industry on mount
-        if (isAdmin || isIndustry) {
+        // Auto-fetch location for Admin, Industry and NGO on mount
+        if (isAdmin || isIndustry || isNGO) {
             getCurrentLocation()
         }
-    }, [isAdmin, isIndustry])
+    }, [isAdmin, isIndustry, isNGO])
 
     // Get current location using browser's Geolocation API
     const getCurrentLocation = () => {
@@ -563,8 +563,8 @@ const Dashboard = () => {
                     ))}
                 </motion.div>
 
-                {/* Location Tracking Card - Admin & Industry Only */}
-                {(isAdmin || isIndustry) && (
+                {/* Location Tracking Card - Admin, Industry & NGO */}
+                {(isAdmin || isIndustry || isNGO) && (
                     <AnimatePresence>
                         {showLocationCard && (
                             <motion.div
@@ -729,8 +729,8 @@ const Dashboard = () => {
                         {showStatistics ? '📊 Hide Statistics' : '📊 View Impact Statistics'}
                     </motion.button>
 
-                    {/* Location Tracking Button - Admin & Industry Only */}
-                    {(isAdmin || isIndustry) && (
+                    {/* Location Tracking Button - Admin, Industry & NGO */}
+                    {(isAdmin || isIndustry || isNGO) && (
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
