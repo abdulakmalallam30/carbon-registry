@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser, registerUser, USER_ROLES } from '../firebase/auth';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,6 +17,7 @@ const Login = () => {
   
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
 
   // Redirect if already logged in
   if (currentUser) {
@@ -88,177 +90,163 @@ const Login = () => {
       description: 'Purchase carbon credits to offset emissions',
       icon: '🏭',
     },
-    {
-      value: USER_ROLES.ADMIN,
-      label: 'Administrator',
-      description: 'Verify projects and issue carbon credits',
-      icon: '👨‍💼',
-    },
   ];
 
+  const inputClass =
+    'w-full px-4 py-3 bg-slate-900/55 border border-cyan-300/25 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/60 focus:border-cyan-300/50 transition-all';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-green-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            🌿 Carbon Registry
-          </h1>
-          <p className="text-gray-600">
-            {isLogin ? 'Sign in to your account' : 'Create a new account'}
+    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_20%_20%,#1a4e78_0%,#0d2945_30%,#081629_70%,#050d1a_100%)] pt-28 sm:pt-32 pb-10 px-4 sm:px-6 lg:px-8">
+      <div className="login-wave login-wave-1" />
+      <div className="login-wave login-wave-2" />
+      <div className="login-wave login-wave-3" />
+
+      {[...Array(14)].map((_, i) => (
+        <span
+          key={i}
+          className="login-bubble"
+          style={{
+            left: `${(i * 7) % 100}%`,
+            animationDelay: `${(i % 6) * 0.8}s`,
+            animationDuration: `${10 + (i % 5) * 2}s`,
+            width: `${10 + (i % 4) * 6}px`,
+            height: `${10 + (i % 4) * 6}px`
+          }}
+        />
+      ))}
+
+      <div className="relative z-10 max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 items-center">
+        <div className="text-white">
+          <p className="inline-flex items-center gap-2 text-cyan-200/90 border border-cyan-300/30 bg-cyan-500/10 rounded-full px-4 py-1 mb-5 text-sm">
+            <span>{t('login.badge')}</span>
           </p>
-        </div>
+          <h1 className="text-4xl sm:text-5xl font-black mb-4 leading-tight" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>
+            {t('login.title')}
+          </h1>
+          <p className="text-slate-200/90 max-w-xl mb-6" />
 
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="md:flex">
-            {/* Left Side - Role Selection (only shown for registration) */}
-            {!isLogin && (
-              <div className="md:w-1/2 bg-gradient-to-br from-green-600 to-blue-600 p-8 text-white">
-                <h2 className="text-2xl font-bold mb-6">Select Your Role</h2>
-                <div className="space-y-4">
-                  {roleOptions.map((role) => (
-                    <div
-                      key={role.value}
-                      onClick={() => handleRoleSelect(role.value)}
-                      className={`p-4 rounded-lg cursor-pointer transition-all ${
-                        selectedRole === role.value
-                          ? 'bg-white text-gray-800 shadow-lg transform scale-105'
-                          : 'bg-white/20 hover:bg-white/30'
-                      }`}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <span className="text-3xl">{role.icon}</span>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-1">
-                            {role.label}
-                          </h3>
-                          <p
-                            className={`text-sm ${
-                              selectedRole === role.value
-                                ? 'text-gray-600'
-                                : 'text-white/90'
-                            }`}
-                          >
-                            {role.description}
-                          </p>
-                        </div>
-                        {selectedRole === role.value && (
-                          <span className="text-green-600 text-xl">✓</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {roleOptions.map((role) => (
+              <div key={role.value} className="rounded-xl border border-cyan-300/20 bg-slate-900/35 backdrop-blur-md p-3">
+                <div className="text-2xl mb-1">{role.icon}</div>
+                <div className="text-sm font-semibold text-white">{role.label.split('/')[0].trim()}</div>
+                <div className="text-xs text-cyan-100/80 mt-1">{role.description}</div>
               </div>
-            )}
-
-            {/* Right Side - Form */}
-            <div className={`${!isLogin ? 'md:w-1/2' : 'w-full'} p-8`}>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {!isLogin && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      name="displayName"
-                      value={formData.displayName}
-                      onChange={handleInputChange}
-                      placeholder="Enter your name"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      required={!isLogin}
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="you@example.com"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                    minLength={6}
-                  />
-                </div>
-
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                    {error}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
-                </button>
-              </form>
-
-              <div className="mt-6 text-center">
-                <button
-                  onClick={() => {
-                    setIsLogin(!isLogin);
-                    setError('');
-                  }}
-                  className="text-green-600 hover:text-green-700 font-medium"
-                >
-                  {isLogin
-                    ? "Don't have an account? Sign up"
-                    : 'Already have an account? Sign in'}
-                </button>
-              </div>
-
-              {isLogin && (
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <p className="text-sm text-gray-600 text-center mb-4">
-                    Quick Access for Testing:
-                  </p>
-                  <div className="grid grid-cols-3 gap-2 text-xs">
-                    {roleOptions.map((role) => (
-                      <div
-                        key={role.value}
-                        className="text-center p-2 bg-gray-50 rounded"
-                      >
-                        <span className="text-2xl block mb-1">{role.icon}</span>
-                        <span className="text-gray-600">{role.label.split('/')[0].trim()}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Footer Note */}
-        <p className="text-center text-gray-600 text-sm mt-6">
-          Secure authentication powered by Firebase 🔒
-        </p>
+        <div className="rounded-3xl border border-cyan-300/25 bg-slate-950/45 backdrop-blur-2xl shadow-[0_20px_70px_rgba(0,0,0,0.45)] p-6 sm:p-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-white mb-1">
+              {isLogin ? t('login.signIn') : t('login.createAccount')}
+            </h2>
+            <p className="text-cyan-100/80 text-sm">
+              {isLogin ? t('login.accessSecure') : t('login.joinRole')}
+            </p>
+          </div>
+
+          {!isLogin && (
+            <div className="space-y-3 mb-6">
+              <p className="text-sm font-semibold text-cyan-100">{t('login.chooseRole')}</p>
+              {roleOptions.map((role) => (
+                <button
+                  type="button"
+                  key={role.value}
+                  onClick={() => handleRoleSelect(role.value)}
+                  className={`w-full text-left p-3 rounded-xl border transition-all ${
+                    selectedRole === role.value
+                      ? 'border-cyan-300 bg-cyan-500/20 text-white'
+                      : 'border-cyan-300/20 bg-slate-900/35 text-cyan-100 hover:bg-slate-800/45'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">{role.icon}</span>
+                    <div className="flex-1">
+                      <div className="font-semibold">{role.label}</div>
+                      <div className="text-xs opacity-90">{role.description}</div>
+                    </div>
+                    {selectedRole === role.value && <span className="text-cyan-100">✓</span>}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {!isLogin && (
+              <div>
+                <label className="block text-sm font-medium text-cyan-100 mb-2">{t('login.fullName')}</label>
+                <input
+                  type="text"
+                  name="displayName"
+                  value={formData.displayName}
+                  onChange={handleInputChange}
+                  placeholder={t('login.enterName')}
+                  className={inputClass}
+                  required={!isLogin}
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-cyan-100 mb-2">{t('login.email')}</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="you@example.com"
+                className={inputClass}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-cyan-100 mb-2">{t('login.password')}</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder={t('login.enterPassword')}
+                className={inputClass}
+                required
+                minLength={6}
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-500/15 border border-red-400/40 text-red-100 px-4 py-3 rounded-xl text-sm">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 text-white py-3 rounded-xl font-semibold hover:from-cyan-400 hover:via-sky-400 hover:to-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-cyan-900/40"
+            >
+              {loading ? t('login.loading') : isLogin ? t('login.signIn') : t('login.createAccount')}
+            </button>
+          </form>
+
+          <div className="mt-5 text-center">
+            <button
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError('');
+              }}
+              className="text-cyan-200 hover:text-cyan-100 font-medium"
+            >
+              {isLogin
+                ? t('login.noAccount')
+                : t('login.haveAccount')}
+            </button>
+          </div>
+
+          <p className="text-center text-cyan-100/70 text-xs mt-6" />
+        </div>
       </div>
     </div>
   );

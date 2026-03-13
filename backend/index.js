@@ -40,6 +40,10 @@ const PROJECT_STATUS = {
 
 const FAQ_ENTRIES = [
   {
+    keywords: ['hello', 'hi', 'hey'],
+    answer: 'Hello! Ask me anything about carbon projects, credits, verification, or even general questions. I can answer random questions too.'
+  },
+  {
     keywords: ['register', 'project', 'ngo'],
     answer: 'NGO and Admin users can register projects from Dashboard > Register New Project. NGOs/Admin can track GPS and use the Use GPS button in the form before submitting.'
   },
@@ -87,59 +91,113 @@ function getFaqReply(message) {
 }
 
 async function getAiReply(message, role) {
+  const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+  const ollamaModel = process.env.OLLAMA_MODEL || 'llama3.2:3b';
+  const ollamaFastModel = process.env.OLLAMA_FAST_MODEL || 'gemma3:270m';
   const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
-  if (!apiKey) {
-    return {
-      available: false,
-      text: 'AI fallback is not configured yet. Set OPENAI_API_KEY in backend/.env to enable dynamic answers.'
-    };
-  }
+  const buildPrompt = () => (
+    'You are a helpful assistant for a Blue Carbon Registry dApp. ' +
+    'Answer clearly and directly. If user asks general random questions, answer them normally too. ' +
+    `User role: ${role || 'guest'}. Question: ${message}`
+  );
+
+  const callOllama = async (modelName, timeoutMs = 25000) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(`${ollamaUrl}/api/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: modelName,
+          stream: false,
+          prompt: buildPrompt(),
+          options: {
+            temperature: 0.5,
+            num_predict: 220
+          }
+        })
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      const text = data?.response?.trim();
+      return text || null;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.3,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a concise assistant for a Blue Carbon Registry dApp. Give practical role-aware steps for admin, ngo, and industry flows.'
-          },
-          {
-            role: 'user',
-            content: `User role: ${role || 'guest'}\nQuestion: ${message}`
-          }
-        ]
-      })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
+    const primaryText = await callOllama(ollamaModel, 25000);
+    if (primaryText) {
       return {
-        available: false,
-        text: `AI fallback request failed: ${errText}`
+        available: true,
+        text: primaryText
       };
     }
 
-    const data = await response.json();
-    const text = data?.choices?.[0]?.message?.content?.trim();
-    return {
-      available: true,
-      text: text || 'No AI response received.'
-    };
+    if (ollamaFastModel && ollamaFastModel !== ollamaModel) {
+      const fastText = await callOllama(ollamaFastModel, 18000);
+      if (fastText) {
+        return {
+          available: true,
+          text: fastText
+        };
+      }
+    }
   } catch (error) {
-    return {
-      available: false,
-      text: `AI fallback error: ${error.message}`
-    };
+    // Continue to optional OpenAI fallback below.
   }
+
+  if (apiKey) {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: openaiModel,
+          temperature: 0.3,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a concise assistant for a Blue Carbon Registry dApp. Give practical role-aware steps for admin, ngo, and industry flows.'
+            },
+            {
+              role: 'user',
+              content: `User role: ${role || 'guest'}\nQuestion: ${message}`
+            }
+          ]
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const text = data?.choices?.[0]?.message?.content?.trim();
+        return {
+          available: true,
+          text: text || 'No AI response received.'
+        };
+      }
+    } catch (error) {
+      // Fall through to local setup guidance.
+    }
+  }
+
+  return {
+    available: false,
+    text:
+      'AI is temporarily unavailable. I can still help with Blue Carbon Registry questions right now. For random/general questions, please start Ollama and try again.'
+  };
 }
 
 // Routes

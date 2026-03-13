@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
+import { useLanguage } from '../context/LanguageContext'
 
 const About = () => {
+  const { t } = useLanguage()
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -261,19 +264,20 @@ const About = () => {
         >
           <div className="bg-gradient-to-br from-teal-500/10 to-ocean-500/10 backdrop-blur-sm border border-teal-500/30 rounded-2xl p-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Join Us in Protecting Our Oceans
+              {t('about.ctaTitle')}
             </h2>
             <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
-              Together, we can create a sustainable future by preserving and restoring 
-              critical blue carbon ecosystems while supporting climate action.
+              {t('about.ctaDesc')}
             </p>
-            <motion.button
-              className="px-8 py-4 bg-gradient-to-r from-teal-500 to-ocean-600 text-white font-semibold rounded-lg shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Get Started
-            </motion.button>
+            <Link to="/login">
+              <motion.button
+                className="px-8 py-4 bg-gradient-to-r from-teal-500 to-ocean-600 text-white font-semibold rounded-lg shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {t('about.getStarted')}
+              </motion.button>
+            </Link>
           </div>
         </motion.section>
       </div>

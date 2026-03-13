@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import { useLanguage } from '../context/LanguageContext'
 import introVideo from '../intro 1.mp4'
 
 const Home = () => {
+  const { t } = useLanguage()
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -85,14 +87,15 @@ const Home = () => {
             style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900', letterSpacing: '0.05em', textShadow: '0 0 30px rgba(255,255,255,0.3)' }}
             variants={itemVariants}
           >
-            BLUE CARBON REGISTRY
+            <span className="text-sky-400">BLUE</span>{' '}
+            <span className="text-white">CARBON REGISTRY</span>
           </motion.h1>
 
           <motion.p
             className="text-xl sm:text-2xl text-white mb-10 font-bold drop-shadow-lg italic opacity-90"
             variants={itemVariants}
           >
-            🌊 Protecting Our Oceans, One Credit at a Time
+            🌊 {t('home.subtitle')}
           </motion.p>
 
           <motion.p
@@ -100,7 +103,7 @@ const Home = () => {
             style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900' }}
             variants={itemVariants}
           >
-            A transparent digital system to:
+            {t('home.systemTo')}
           </motion.p>
 
           <motion.div
@@ -122,10 +125,10 @@ const Home = () => {
                 📝
               </motion.div>
               <h3 className="text-3xl font-black text-white drop-shadow-2xl mb-3" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900', letterSpacing: '0.02em' }}>
-                REGISTER
+                {t('home.register')}
               </h3>
-              <p className="text-base text-white font-black mb-1">Blue Carbon Projects</p>
-              <p className="text-sm text-cyan-200 opacity-90">Tokenize & Track</p>
+              <p className="text-base text-white font-black mb-1">{t('home.registerSub1')}</p>
+              <p className="text-sm text-cyan-200 opacity-90">{t('home.registerSub2')}</p>
             </motion.div>
 
             <motion.div
@@ -143,10 +146,10 @@ const Home = () => {
                 📊
               </motion.div>
               <h3 className="text-3xl font-black text-white drop-shadow-2xl mb-3" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900', letterSpacing: '0.02em' }}>
-                MONITOR
+                {t('home.monitor')}
               </h3>
-              <p className="text-base text-white font-black mb-1">Real-Time Data</p>
-              <p className="text-sm text-sky-200 opacity-90">Live Analytics</p>
+              <p className="text-base text-white font-black mb-1">{t('home.monitorSub1')}</p>
+              <p className="text-sm text-sky-200 opacity-90">{t('home.monitorSub2')}</p>
             </motion.div>
 
             <motion.div
@@ -164,10 +167,10 @@ const Home = () => {
                 ✅
               </motion.div>
               <h3 className="text-3xl font-black text-white drop-shadow-2xl mb-3" style={{ fontFamily: '"Arial Black", "Arial Bold", Gadget, sans-serif', fontWeight: '900', letterSpacing: '0.02em' }}>
-                VERIFY
+                {t('home.verify')}
               </h3>
-              <p className="text-base text-white font-black mb-1">Certified Credits</p>
-              <p className="text-sm text-blue-200 opacity-90">Blockchain Secured</p>
+              <p className="text-base text-white font-black mb-1">{t('home.verifySub1')}</p>
+              <p className="text-sm text-blue-200 opacity-90">{t('home.verifySub2')}</p>
             </motion.div>
           </motion.div>
 
@@ -251,7 +254,7 @@ const Home = () => {
               whileHover={{ scale: 1.08, boxShadow: '0 20px 60px rgba(255, 255, 255, 0.5)' }}
               whileTap={{ scale: 0.95 }}
             >
-              EXPLORE REGISTRY
+              {t('home.explore')}
             </motion.button>
 
             <Link to="/about">
@@ -261,7 +264,7 @@ const Home = () => {
                 whileHover={{ scale: 1.08, borderColor: 'rgba(255, 255, 255, 1)', boxShadow: '0 20px 60px rgba(255, 255, 255, 0.3)' }}
                 whileTap={{ scale: 0.95 }}
               >
-                LEARN MORE
+                {t('home.learnMore')}
               </motion.button>
             </Link>
           </motion.div>

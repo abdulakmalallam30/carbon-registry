@@ -6,15 +6,19 @@ import About from './pages/About'
 import Projects from './pages/Projects'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
+import AdminLogin from './pages/AdminLogin'
+import Admin from './pages/Admin'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
+import { LanguageProvider } from './context/LanguageContext'
 import ChatBot from './components/ChatBot'
 
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <div className="relative min-h-screen bg-gradient-to-br from-[#0a1628] via-[#0d1f3a] to-[#0a1628]">
+      <LanguageProvider>
+        <AuthProvider>
+          <div className="relative min-h-screen bg-gradient-to-br from-[#0a1628] via-[#0d1f3a] to-[#0a1628]">
           {/* Animated Background */}
           <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
             {/* Gradient Orbs */}
@@ -46,6 +50,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/admin-login" element={<AdminLogin />} />
+              <Route path="/admin" element={<Admin />} />
               <Route 
                 path="/projects" 
                 element={
@@ -64,10 +70,11 @@ function App() {
               />
             </Routes>
           </main>
-          <Footer />
-          <ChatBot />
-        </div>
-      </AuthProvider>
+            <Footer />
+            <ChatBot />
+          </div>
+        </AuthProvider>
+      </LanguageProvider>
     </Router>
   )
 }

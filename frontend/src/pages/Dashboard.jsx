@@ -441,6 +441,16 @@ const Dashboard = () => {
         }
     }, [isRegisterModalOpen])
 
+    // Hide navbar when register modal is open
+    useEffect(() => {
+        if (isRegisterModalOpen) {
+            document.body.classList.add('register-modal-open')
+        } else {
+            document.body.classList.remove('register-modal-open')
+        }
+        return () => document.body.classList.remove('register-modal-open')
+    }, [isRegisterModalOpen])
+
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -1365,17 +1375,18 @@ const Dashboard = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm"
+                        className="fixed inset-0 z-[9999] flex items-start justify-center px-4 py-6 bg-black/60 backdrop-blur-sm overflow-y-auto"
+                        onClick={(e) => { if (e.target === e.currentTarget) setIsRegisterModalOpen(false) }}
                     >
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                            className="bg-blue-deep border border-teal-500/30 rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl shadow-teal-500/20 relative"
+                            className="bg-blue-deep border border-teal-500/30 rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl shadow-teal-500/20 relative my-auto"
                         >
                             <button
                                 onClick={() => setIsRegisterModalOpen(false)}
-                                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

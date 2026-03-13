@@ -16,6 +16,11 @@
   box-sizing: border-box;
 }
 
+/* Hide navbar when project registration modal is open */
+body.register-modal-open nav {
+  display: none !important;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   background-color: #0a1628;
@@ -46,4 +51,73 @@ html {
 
 .animate-float {
   animation: float linear infinite;
+}
+
+@keyframes login-wave-slide {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-8%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes login-bubble-rise {
+  0% {
+    transform: translateY(0) scale(0.9);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.5;
+  }
+  70% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(-120vh) scale(1.15);
+    opacity: 0;
+  }
+}
+
+.login-wave {
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  border-radius: 44% 56% 58% 42% / 55% 41% 59% 45%;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.login-wave-1 {
+  bottom: -120px;
+  height: 340px;
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.16), rgba(14, 116, 144, 0.28));
+  animation: login-wave-slide 14s ease-in-out infinite;
+}
+
+.login-wave-2 {
+  bottom: -150px;
+  height: 300px;
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.12), rgba(12, 74, 110, 0.26));
+  animation: login-wave-slide 18s ease-in-out infinite reverse;
+}
+
+.login-wave-3 {
+  bottom: -190px;
+  height: 260px;
+  background: linear-gradient(180deg, rgba(14, 165, 233, 0.1), rgba(3, 37, 65, 0.22));
+  animation: login-wave-slide 22s ease-in-out infinite;
+}
+
+.login-bubble {
+  position: absolute;
+  bottom: -40px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.6), rgba(125, 211, 252, 0.2));
+  border: 1px solid rgba(165, 243, 252, 0.25);
+  pointer-events: none;
+  animation: login-bubble-rise linear infinite;
 }

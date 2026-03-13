@@ -2,12 +2,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
 import { logoutUser, USER_ROLES } from '../firebase/auth'
 
 const Navbar = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, userRole, isNGO, isIndustry, isAdmin } = useAuth()
+  const { t } = useLanguage()
   const [scrolled, setScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
 
@@ -33,10 +35,10 @@ const Navbar = () => {
   }
 
   const getRoleLabel = () => {
-    if (isNGO) return 'NGO'
-    if (isIndustry) return 'Industry'
-    if (isAdmin) return 'Admin'
-    return 'User'
+    if (isNGO) return t('nav.role.ngo')
+    if (isIndustry) return t('nav.role.industry')
+    if (isAdmin) return t('nav.role.admin')
+    return t('nav.role.user')
   }
 
   const isActive = (path) => location.pathname === path
@@ -92,7 +94,7 @@ const Navbar = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Home
+                {t('nav.home')}
                 {isActive('/') && (
                   <motion.div
                     className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-400 to-ocean-500"
@@ -114,7 +116,7 @@ const Navbar = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                About
+                {t('nav.about')}
                 {isActive('/about') && (
                   <motion.div
                     className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-400 to-ocean-500"
@@ -138,7 +140,7 @@ const Navbar = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Projects
+                    {t('nav.projects')}
                     {isActive('/projects') && (
                       <motion.div
                         className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-400 to-ocean-500"
@@ -160,7 +162,7 @@ const Navbar = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Dashboard
+                    {t('nav.dashboard')}
                     {isActive('/dashboard') && (
                       <motion.div
                         className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-400 to-ocean-500"
@@ -201,7 +203,7 @@ const Navbar = () => {
                     className="absolute right-0 mt-2 w-48 bg-gray-900/95 backdrop-blur-lg rounded-lg shadow-xl border border-teal-400/30 overflow-hidden"
                   >
                     <div className="px-4 py-3 border-b border-gray-700">
-                      <p className="text-sm text-gray-300">Signed in as</p>
+                      <p className="text-sm text-gray-300">{t('nav.signedInAs')}</p>
                       <p className="text-sm font-medium text-white truncate">
                         {currentUser.email}
                       </p>
@@ -210,21 +212,32 @@ const Navbar = () => {
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                     >
-                      Sign Out
+                      {t('nav.signOut')}
                     </button>
                   </motion.div>
                 )}
               </div>
             ) : (
-              <Link to="/login">
-                <motion.button
-                  className="bg-gradient-to-r from-teal-500 to-ocean-600 text-white px-6 py-2 rounded-lg font-medium shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Sign In
-                </motion.button>
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link to="/login">
+                  <motion.button
+                    className="bg-gradient-to-r from-teal-500 to-ocean-600 text-white px-6 py-2 rounded-lg font-medium shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {t('nav.signIn')}
+                  </motion.button>
+                </Link>
+                <Link to="/admin-login">
+                  <motion.button
+                    className="bg-gradient-to-r from-red-500 to-orange-600 text-white px-4 py-2 rounded-lg font-medium shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all text-sm"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Admin
+                  </motion.button>
+                </Link>
+              </div>
             )}
           </div>
         </div>

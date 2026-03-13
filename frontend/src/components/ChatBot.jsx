@@ -28,7 +28,7 @@ const starterByRole = {
 
 const ChatBot = () => {
   const { userRole, isAdmin, isNGO, isIndustry } = useAuth()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const [messages, setMessages] = useState([
@@ -76,10 +76,10 @@ const ChatBot = () => {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-[9998] px-5 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-xl border border-cyan-300/40"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9998] px-5 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-xl border border-cyan-300/40"
         title="Open assistant"
       >
-        Bot Assistant
+        {open ? 'Hide Assistant' : 'Ask AI Assistant'}
       </motion.button>
 
       <AnimatePresence>
@@ -88,7 +88,7 @@ const ChatBot = () => {
             initial={{ opacity: 0, y: 16, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
-            className="fixed bottom-24 right-6 z-[9998] w-[92vw] max-w-md h-[72vh] max-h-[620px] bg-[#0a1628]/95 backdrop-blur-xl border border-cyan-400/30 rounded-2xl shadow-2xl overflow-hidden"
+            className="fixed bottom-20 right-2 sm:bottom-24 sm:right-6 z-[9998] w-[96vw] sm:w-[92vw] max-w-md h-[78vh] max-h-[680px] bg-[#0a1628]/95 backdrop-blur-xl border border-cyan-400/30 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
           >
             <div className="px-4 py-3 border-b border-cyan-400/20 bg-gradient-to-r from-cyan-500/20 to-blue-600/20">
               <div className="flex items-center justify-between">
@@ -118,7 +118,11 @@ const ChatBot = () => {
               ))}
             </div>
 
-            <div className="h-[calc(100%-164px)] overflow-y-auto p-4 space-y-3">
+            <div className="px-4 py-2 text-xs text-cyan-200 border-b border-cyan-400/10">
+              Type your question in the box at the bottom and press Send.
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
               {messages.map((msg, idx) => (
                 <div
                   key={`${msg.role}-${idx}`}
@@ -148,7 +152,7 @@ const ChatBot = () => {
                 e.preventDefault()
                 sendMessage(text)
               }}
-              className="p-3 border-t border-cyan-400/20 flex gap-2"
+              className="p-3 border-t border-cyan-400/20 flex gap-2 bg-[#0a1628]/95"
             >
               <input
                 value={text}
