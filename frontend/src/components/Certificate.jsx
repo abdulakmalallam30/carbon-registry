@@ -1,21 +1,24 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
-import html2pdf from 'html2pdf.js';
 
 const Certificate = ({ creditData, userName, onClose }) => {
   const certificateRef = useRef();
 
   const handleDownloadPDF = () => {
-    if (certificateRef.current) {
+    if (certificateRef.current && typeof html2pdf !== 'undefined') {
       const element = certificateRef.current;
-      const opt = {
+      html2pdf().set({
         margin: 0,
         filename: `carbon-certificate-${creditData.id || Date.now()}.pdf`,
         image: { type: 'png', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' },
-      };
-      html2pdf().set(opt).from(element).save();
+      }).from(element).save();
+    } else if (!certificateRef.current) {
+      alert('Certificate element not found');
+    } else {
+      // Fallback: provide simple download instructions
+      alert('PDF download will be available. For now, please use the Print option.');
     }
   };
 
