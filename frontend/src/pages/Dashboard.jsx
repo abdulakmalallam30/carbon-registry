@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { getProjects, getCredits, issueCredit, getAccounts, verifyProject, registerProject, retireCredit, searchProjectById, filterProjects, updateProjectStatus, getTransactions } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import ImpactStatistics from '../components/ImpactStatistics'
+import Certificate from '../components/Certificate'
 
 const Dashboard = () => {
     const { currentUser, userRole, isNGO, isIndustry, isAdmin } = useAuth()
@@ -44,6 +45,10 @@ const Dashboard = () => {
     const [isRetireModalOpen, setIsRetireModalOpen] = useState(false)
     const [retireForm, setRetireForm] = useState({ creditId: '' })
     const [isRetiring, setIsRetiring] = useState(false)
+
+    // Certificate Display
+    const [showCertificate, setShowCertificate] = useState(false)
+    const [certificateData, setCertificateData] = useState(null)
 
     // Advanced Filtering & Sorting
     const [filters, setFilters] = useState({
@@ -392,6 +397,19 @@ const Dashboard = () => {
         
         const result = await retireCredit(retireForm.creditId)
         if (result.success) {
+            // Find the credit details for the certificate
+            const retiredCredit = allCredits.find(c => c.id === retireForm.creditId)
+            const relatedProject = allProjects.find(p => p.id === retiredCredit?.projectId)
+            
+            // Set certificate data
+            setCertificateData({
+                id: retireForm.creditId,
+                amount: retiredCredit?.amount || 0,
+                projectName: relatedProject?.name || 'Blue Carbon Project',
+                purchaseDate: new Date().toLocaleDateString()
+            })
+            
+            setShowCertificate(true)
             setSuccessMessage('✅ Credit purchased and retired successfully!')
             setRetireForm({ creditId: '' })
             setIsRetireModalOpen(false)
@@ -1930,6 +1948,17 @@ const Dashboard = () => {
                             </form>
                         </motion.div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Green Certificate Modal */}
+            <AnimatePresence>
+                {showCertificate && certificateData && (
+                    <Certificate 
+                        creditData={certificateData}
+                        userName={currentUser?.displayName || currentUser?.email}
+                        onClose={() => setShowCertificate(false)}
+                    />
                 )}
             </AnimatePresence>
         </div>
