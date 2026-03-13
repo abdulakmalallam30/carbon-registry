@@ -27,8 +27,12 @@ const Dashboard = () => {
         name: '',
         description: '',
         location: '',
-        acres: ''
+        acres: '',
+        plantType: '',
+        projectImageFile: null,
+        projectImagePreview: ''
     })
+    const [carbonPrediction, setCarbonPrediction] = useState(null)
     const [isRegistering, setIsRegistering] = useState(false)
 
     // Issue Credit Modal (Admin only)
@@ -81,11 +85,11 @@ const Dashboard = () => {
     useEffect(() => {
         fetchDashboardData()
         fetchAccounts()
-        // Auto-fetch location for Admin, Industry and NGO on mount
-        if (isAdmin || isIndustry || isNGO) {
+        // Auto-fetch location for Admin and NGO on mount (Industry only views, doesn't track)
+        if (isAdmin || isNGO) {
             getCurrentLocation()
         }
-    }, [isAdmin, isIndustry, isNGO])
+    }, [isAdmin, isNGO])
 
     // Get current location using browser's Geolocation API
     const getCurrentLocation = () => {
@@ -300,7 +304,8 @@ const Dashboard = () => {
         )
         if (result.success) {
             setSuccessMessage(`✅ Project "${projectForm.name}" registered successfully!`)
-            setProjectForm({ name: '', description: '', location: '', acres: '' })
+            setProjectForm({ name: '', description: '', location: '', acres: '', plantType: '', projectImageFile: null, projectImagePreview: '' })
+            setCarbonPrediction(null)
             setIsRegisterModalOpen(false)
             fetchDashboardData()
             setTimeout(() => setSuccessMessage(''), 3000)
@@ -397,6 +402,44 @@ const Dashboard = () => {
         }
         setIsRetiring(false)
     }
+
+    // Carbon sequestration rates (tCO₂e per acre per year) - based on scientific estimates
+    const CARBON_RATES = {
+        mangroves:           { rate: 7.0,  label: 'Mangroves' },
+        seagrass:            { rate: 1.5,  label: 'Seagrass Meadows' },
+        saltMarsh:           { rate: 3.0,  label: 'Salt Marshes' },
+        tidalWetlands:       { rate: 3.5,  label: 'Tidal Wetlands' },
+        freshwaterWetlands:  { rate: 2.0,  label: 'Freshwater Wetlands' },
+        kelpForest:          { rate: 0.8,  label: 'Kelp Forest' },
+        mixedBlueCarbon:     { rate: 4.5,  label: 'Mixed Blue Carbon Ecosystem' },
+    }
+
+    const calculateCarbonPrediction = (acres, plantType) => {
+        if (!acres || !plantType || parseFloat(acres) <= 0) return null
+        const rateInfo = CARBON_RATES[plantType]
+        if (!rateInfo) return null
+        const a = parseFloat(acres)
+        const r = rateInfo.rate
+        return {
+            label: rateInfo.label,
+            ratePerAcrePerYear: r,
+            year1:  (a * r * 1).toFixed(1),
+            year5:  (a * r * 5).toFixed(1),
+            year10: (a * r * 10).toFixed(1),
+            year25: (a * r * 25).toFixed(1),
+            year50: (a * r * 50).toFixed(1),
+        }
+    }
+
+    // Auto-populate GPS location when NGO opens registration modal
+    useEffect(() => {
+        if (isRegisterModalOpen && (isNGO || isAdmin) && userLocation && !projectForm.location) {
+            setProjectForm(prev => ({
+                ...prev,
+                location: `${userLocation.latitude.toFixed(6)}, ${userLocation.longitude.toFixed(6)}`
+            }))
+        }
+    }, [isRegisterModalOpen])
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -563,8 +606,8 @@ const Dashboard = () => {
                     ))}
                 </motion.div>
 
-                {/* Location Tracking Card - Admin, Industry & NGO */}
-                {(isAdmin || isIndustry || isNGO) && (
+                {/* Location Tracking Card - Admin & NGO only (Industry can only view project locations) */}
+                {(isAdmin || isNGO) && (
                     <AnimatePresence>
                         {showLocationCard && (
                             <motion.div
@@ -729,8 +772,8 @@ const Dashboard = () => {
                         {showStatistics ? '📊 Hide Statistics' : '📊 View Impact Statistics'}
                     </motion.button>
 
-                    {/* Location Tracking Button - Admin, Industry & NGO */}
-                    {(isAdmin || isIndustry || isNGO) && (
+                    {/* Location Tracking Button - Admin & NGO only */}
+                    {(isAdmin || isNGO) && (
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -1348,6 +1391,7 @@ const Dashboard = () => {
                             )}
                             
                             <form onSubmit={handleRegisterProject}>
+                                {/* Project Name */}
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-300 mb-2">Project Name *</label>
                                     <input
@@ -1359,7 +1403,8 @@ const Dashboard = () => {
                                         placeholder="e.g., Mangrove Restoration 2026"
                                     />
                                 </div>
-                                
+
+                                {/* Description */}
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
                                     <textarea
@@ -1372,6 +1417,7 @@ const Dashboard = () => {
                                     />
                                 </div>
 
+                                {/* Location — GPS auto-tracked for NGO/Admin */}
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-300 mb-2">Location *</label>
                                     <div className="relative">
@@ -1386,25 +1432,49 @@ const Dashboard = () => {
                                         {userLocation && (
                                             <button
                                                 type="button"
-                                                onClick={() => {
-                                                    const coords = `${userLocation.latitude.toFixed(6)}, ${userLocation.longitude.toFixed(6)}`
-                                                    setProjectForm({ ...projectForm, location: coords })
-                                                }}
+                                                onClick={() => setProjectForm({ ...projectForm, location: `${userLocation.latitude.toFixed(6)}, ${userLocation.longitude.toFixed(6)}` })}
                                                 className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-cyan-500/30 hover:bg-cyan-500/50 border border-cyan-400/50 text-cyan-300 text-sm rounded transition-all"
-                                                title="Use tracked GPS coordinates"
                                             >
                                                 📍 Use GPS
                                             </button>
                                         )}
                                     </div>
-                                    {userLocation && (
-                                        <p className="text-xs text-cyan-400 mt-1">
-                                            GPS available: {userLocation.latitude.toFixed(6)}, {userLocation.longitude.toFixed(6)}
+                                    {userLocation ? (
+                                        <p className="text-xs text-cyan-400 mt-1 flex items-center gap-1">
+                                            <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                            GPS tracked: {userLocation.latitude.toFixed(6)}, {userLocation.longitude.toFixed(6)} (±{Math.round(userLocation.accuracy)}m)
                                         </p>
+                                    ) : (
+                                        <p className="text-xs text-yellow-400 mt-1">📡 Getting GPS location...</p>
                                     )}
                                 </div>
 
-                                <div className="mb-6">
+                                {/* Ecosystem / Plant Type */}
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Ecosystem / Plant Type *</label>
+                                    <select
+                                        required
+                                        value={projectForm.plantType}
+                                        onChange={(e) => {
+                                            const updated = { ...projectForm, plantType: e.target.value }
+                                            setProjectForm(updated)
+                                            setCarbonPrediction(calculateCarbonPrediction(updated.acres, e.target.value))
+                                        }}
+                                        className="w-full px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
+                                    >
+                                        <option value="" className="bg-gray-900">Select ecosystem type...</option>
+                                        <option value="mangroves" className="bg-gray-900">🌿 Mangroves</option>
+                                        <option value="seagrass" className="bg-gray-900">🌱 Seagrass Meadows</option>
+                                        <option value="saltMarsh" className="bg-gray-900">🏞️ Salt Marshes</option>
+                                        <option value="tidalWetlands" className="bg-gray-900">🌊 Tidal Wetlands</option>
+                                        <option value="freshwaterWetlands" className="bg-gray-900">💧 Freshwater Wetlands</option>
+                                        <option value="kelpForest" className="bg-gray-900">🪸 Kelp Forest</option>
+                                        <option value="mixedBlueCarbon" className="bg-gray-900">🌍 Mixed Blue Carbon Ecosystem</option>
+                                    </select>
+                                </div>
+
+                                {/* Area (Acres) */}
+                                <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-300 mb-2">Area (Acres) *</label>
                                     <input
                                         type="number"
@@ -1412,13 +1482,90 @@ const Dashboard = () => {
                                         min="0.01"
                                         step="0.01"
                                         value={projectForm.acres}
-                                        onChange={(e) => setProjectForm({ ...projectForm, acres: e.target.value })}
+                                        onChange={(e) => {
+                                            const updated = { ...projectForm, acres: e.target.value }
+                                            setProjectForm(updated)
+                                            setCarbonPrediction(calculateCarbonPrediction(e.target.value, updated.plantType))
+                                        }}
                                         className="w-full px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"
                                         placeholder="e.g., 100"
                                     />
                                     <p className="text-xs text-gray-500 mt-1">Total land area for plantation</p>
                                 </div>
-                                
+
+                                {/* Carbon Prediction Panel */}
+                                {carbonPrediction && (
+                                    <div className="mb-4 bg-gradient-to-br from-green-500/10 to-teal-500/10 border border-green-500/30 rounded-xl p-4">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <span className="text-xl">🌿</span>
+                                            <h4 className="text-sm font-bold text-green-300">Predicted Carbon Storage — {carbonPrediction.label}</h4>
+                                        </div>
+                                        <p className="text-xs text-gray-400 mb-3">
+                                            Rate: <span className="text-green-300 font-mono">{carbonPrediction.ratePerAcrePerYear} tCO₂e/acre/year</span> &nbsp;·&nbsp; {projectForm.acres} acres
+                                        </p>
+                                        <div className="grid grid-cols-5 gap-2 text-center">
+                                            {[
+                                                { label: '1 Year',  value: carbonPrediction.year1 },
+                                                { label: '5 Years', value: carbonPrediction.year5 },
+                                                { label: '10 Yrs',  value: carbonPrediction.year10 },
+                                                { label: '25 Yrs',  value: carbonPrediction.year25 },
+                                                { label: '50 Yrs',  value: carbonPrediction.year50 },
+                                            ].map(({ label, value }) => (
+                                                <div key={label} className="bg-black/20 rounded-lg p-2 border border-green-500/20">
+                                                    <div className="text-xs text-gray-400 mb-1">{label}</div>
+                                                    <div className="text-sm font-bold text-green-300 font-mono">{value}</div>
+                                                    <div className="text-xs text-gray-500">tCO₂e</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Project Area Photo */}
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Project Area Photo</label>
+                                    <div className="flex items-center gap-3">
+                                        <label className="flex-1 cursor-pointer flex items-center gap-2 px-4 py-3 bg-ocean-900/50 border border-ocean-500/30 hover:border-teal-400/50 rounded-lg text-gray-400 hover:text-teal-300 transition-all">
+                                            <span>📷</span>
+                                            <span className="text-sm">{projectForm.projectImageFile ? projectForm.projectImageFile.name : 'Upload a photo of the area...'}</span>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0]
+                                                    if (file) {
+                                                        const previewUrl = URL.createObjectURL(file)
+                                                        setProjectForm({ ...projectForm, projectImageFile: file, projectImagePreview: previewUrl })
+                                                    }
+                                                }}
+                                            />
+                                        </label>
+                                        {projectForm.projectImagePreview && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setProjectForm({ ...projectForm, projectImageFile: null, projectImagePreview: '' })}
+                                                className="p-2 text-gray-400 hover:text-red-400 transition-colors"
+                                                title="Remove photo"
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                    {projectForm.projectImagePreview && (
+                                        <div className="mt-3 relative rounded-xl overflow-hidden border border-teal-500/30">
+                                            <img
+                                                src={projectForm.projectImagePreview}
+                                                alt="Project area preview"
+                                                className="w-full max-h-48 object-cover"
+                                            />
+                                            <div className="absolute bottom-2 left-2 bg-black/60 rounded px-2 py-1 text-xs text-white">
+                                                📍 {projectForm.location || 'Location not set'}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <button
                                     type="submit"
                                     disabled={isRegistering}
